@@ -5,13 +5,32 @@ body {
     margin: 0;
 }
 
+h2 {
+    margin: 0;
+    padding: 0;
+}
+
 img {
     max-width: 100%;
     vertical-align: middle;
 }
 
+figure.articleimg {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+figcaption {
+    font-size: .8em;
+    line-height: 1em;
+    padding-top: 4px;
+}
+
 .site-header {
     grid-area: header;
+    background-color: #f2f2f2;
     border-top: 5px solid #424242;
     border-bottom: 1px solid #e8e8e8;
 }
@@ -26,6 +45,7 @@ img {
 
 .wrapper {
     max-width: calc(800px - (30px * 2));
+    margin-top: 30px;
     margin-right: auto;
     margin-left: auto;
     padding-right: 30px;
@@ -39,4 +59,37 @@ img {
     justify-content: center;
     align-items: center;
     padding-bottom: 10px;
+}
+
+.post-content {
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+blockquote {
+    padding: 10px 30px 30px 30px;
+    margin-bottom: 20px;
+    background-color: #289dcc;
+    color: #fff;
+    border-radius: 5px;
+}
+
+blockquote p {
+    font-size: 25px;
+    font-family: 'Open Sans', serif;
+    line-height: 1.4;
+}
+
+.post-list {
+    margin-left: 0;
+    list-style: none;
+}
+
+.post-list>li {
+    margin-bottom: 30px;
+}
+
+.post-date {
+    font-size: 14px;
+    color: #828282;
 }
