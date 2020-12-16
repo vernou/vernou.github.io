@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">16 décembre 2020</span>
+            <h2>ASP.NET Core : Mise en cache des traductions au démarrage</h2>
+            <p>
+                Les traductions en ASP.NET Core sont chargées en cache lors de la première sollicitation.
+                Cela augmente le temps de réponse pour la première requête, déjà conséquent en ASP.NET Core.
+                Pour améliorer les performances, il est possible de charger les traductions au démarrage du site.
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Barrage au Lac du Verdon">
+                <figcaption>Barrage au Lac du Verdon</figcaption>
+            </figure>
+            <p>
+                Les providers de localisation (du moins ceux fournit par Microsoft) met en cache les traductions lues.
+                Donc pour mettre en cache l'ensemble des traductions, il faut forcer la lecture de toutes les traductions.
+                À cette fin, on peut écrire une méthode d'extension qui va lire toutes les traductions dans les langues spécifiées :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+<pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">static</span> <span style="color: #008800; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">LoadTranslation</span>(
+    <span style="color: #008800; font-weight: bold">this</span> IStringLocalizerFactory localizerFactory,
+    IEnumerable&lt;Type&gt; types,
+    IEnumerable&lt;CultureInfo&gt; cultures)
+{
+    Task.Run(() =&gt;
+    {
+        <span style="color: #008800; font-weight: bold">foreach</span> (<span style="color: #333399; font-weight: bold">var</span> type <span style="color: #008800; font-weight: bold">in</span> types)
+        {
+            <span style="color: #333399; font-weight: bold">var</span> localizer = localizerFactory.Create(type);
+            <span style="color: #008800; font-weight: bold">foreach</span> (<span style="color: #333399; font-weight: bold">var</span> culture <span style="color: #008800; font-weight: bold">in</span> cultures)
+            {
+                CultureInfo.CurrentUICulture = culture;
+                _ = localizer.GetAllStrings().ToList();
+            }
+        }
+    });
+}
+</pre>
+            </div>
+            <p>
+                La logique est encapsulée dans une tâche pour charger les traductions en asynchrone et ainsi ne pas ralentir le démarrage de l'application.
+                Autre avantage, la modification de la culture courante
+                <a href="https://docs.microsoft.com/en-US/dotnet/api/system.globalization.cultureinfo.currentuiculture#remarks">se limite au contexte de la tâche</a>
+                et n'impactera pas le fonctionnement de l'application.
+                Du moins en .NET Core et .NET Framework à partir de 4.6, pour les versions antérieures il sera nécessaire de restaurer la culture courante.
+            </p>
+            <p>
+                Ensuite, il suffit d'appeler cette méthode au démarrage du site.
+                La méthode <strong>Configure</strong> de la classe <strong>Startup</strong> est approprié à ce besoin.
+                Elle est appelée au démarrage du site avec la résolution des services pour ces paramètres.
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">Configure</span>(IApplicationBuilder app, IWebHostEnvironment env, IStringLocalizerFactory localizerFactory)
+{
+    <span style="color: #333399; font-weight: bold">var</span> translationTypes = <span style="color: #008800; font-weight: bold">new</span> Type[]
+    {
+        <span style="color: #008800; font-weight: bold">typeof</span>(Trad),
+        <span style="color: #008800; font-weight: bold">typeof</span>(AboutController),
+        <span style="color: #008800; font-weight: bold">typeof</span>(HelloController)
+    };
+    <span style="color: #333399; font-weight: bold">var</span> translationCultures = <span style="color: #008800; font-weight: bold">new</span> CultureInfo[]
+    {
+        <span style="color: #008800; font-weight: bold">new</span> <span style="color: #0066BB; font-weight: bold">CultureInfo</span>(<span style="background-color: #fff0f0">&quot;en&quot;</span>),
+        <span style="color: #008800; font-weight: bold">new</span> <span style="color: #0066BB; font-weight: bold">CultureInfo</span>(<span style="background-color: #fff0f0">&quot;en-US&quot;</span>),
+        <span style="color: #008800; font-weight: bold">new</span> <span style="color: #0066BB; font-weight: bold">CultureInfo</span>(<span style="background-color: #fff0f0">&quot;fr&quot;</span>),
+        <span style="color: #008800; font-weight: bold">new</span> <span style="color: #0066BB; font-weight: bold">CultureInfo</span>(<span style="background-color: #fff0f0">&quot;es&quot;</span>)
+    };
+    localizerFactory.LoadTranslation(translationTypes, translationCultures);
+    ...
+}
+</pre>
+            </div>
+            <blockquote>
+                <p>
+                    <strong>Ce n'est pas la charge, mais l'excès de charge qui tue la bête.</strong>
+                </p>
+                <footer>- <cite>Don Quichotte</cite> de Miguel de Cervantès</footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>
