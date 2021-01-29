@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">29 janvier 2021</span>
+            <h2>ASP.Net Core : Le petit souci de [Required]</h2>
+            <p>
+                L'attribut <a href="https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.dataannotations.requiredattribute">[Required]</a>
+                permet d'indiquer qu'un paramètre est requis en entrée d'une action de contrôleur.
+                Seulement, cet attribut a une limitation qui est frustrante.
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Parterre de Gentiane">
+                <figcaption>Parterre de Gentiane dans les calanques de Marseille</figcaption>
+            </figure>
+            <p>
+                L'attribut <strong>[Required]</strong> permet d'assurer la présence d'un paramètre en entrée d'une action d'un contrôleur :
+            </p>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #0000CC">[ApiController]</span>
+<span style="color: #0000CC">[Route(&quot;data&quot;)]</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">DataController</span> : ControllerBase
+{
+<span style="color: #0000CC">    [HttpGet]</span>
+    <span style="color: #008800; font-weight: bold">public</span> IActionResult <span style="color: #0066BB; font-weight: bold">Get</span>([Required] <span style="color: #333399; font-weight: bold">int</span> id, [Required] <span style="color: #333399; font-weight: bold">string</span> <span style="color: #008800; font-weight: bold">value</span>)
+    {
+        <span style="color: #008800; font-weight: bold">return</span> <span style="color: #0066BB; font-weight: bold">Ok</span>(<span style="color: #008800; font-weight: bold">new</span> { id, <span style="color: #008800; font-weight: bold">value</span> });
+    }
+}
+</pre></div>
+            <p>
+                Ainsi si un paramètre requis est omis, l'application Web retourne une erreur 400 (Bad Request) :
+            </p>
+            <pre>> curl http://localhost:5000/data
+HTTP response status code 400 - Bad Request
+Content :</pre>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">{
+    <span style="color: #007700">&quot;errors&quot;</span>: {
+        <span style="color: #007700">&quot;id&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;The id field is required.&quot;</span>
+        ],
+        <span style="color: #007700">&quot;value&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;The value field is required.&quot;</span>
+        ]
+    }
+}
+</pre></div>
+            <p>
+                Seulement, l'attribut <strong>[Required]</strong> a une limitation avec les types complexes :
+            </p>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #0000CC">[ApiController]</span>
+<span style="color: #0000CC">[Route(&quot;data&quot;)]</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">DataController</span> : ControllerBase
+{
+<span style="color: #0000CC">    [HttpGet]</span>
+    <span style="color: #008800; font-weight: bold">public</span> IActionResult <span style="color: #0066BB; font-weight: bold">Get</span>([FromQuery] Data data)
+    {
+        <span style="color: #008800; font-weight: bold">return</span> <span style="color: #0066BB; font-weight: bold">Ok</span>(data);
+    }
+
+    <span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">Data</span>
+    {
+<span style="color: #0000CC">        [Required]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">int</span> Id { <span style="color: #008800; font-weight: bold">get</span>; <span style="color: #008800; font-weight: bold">set</span>; }
+<span style="color: #0000CC">        [Required]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">string</span> Value { <span style="color: #008800; font-weight: bold">get</span>; <span style="color: #008800; font-weight: bold">set</span>; }
+    }
+}
+</pre></div>
+            <p>Si on applique la même requête, on obtient un résultat différent :</p>
+            <pre>> curl http://localhost:5000/data
+HTTP response status code 400 - Bad Request
+Content :</pre>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">{
+    <span style="color: #007700">&quot;errors&quot;</span>: {
+        <span style="color: #007700">&quot;value&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;The value field is required.&quot;</span>
+        ]
+    }
+}
+</pre></div>
+            <p>
+                L'application Web retourne bien une erreur 400 (Bad Request), mais seul l'absence du paramètre <strong>Value</strong> est indiquée.
+                L'absence du paramètre requis <strong>Id</strong> n'est pas signalée.
+                Par conséquent, une requête sans le paramètre requis <strong>Id</strong> (donc invalide) est acceptée :
+            </p>
+            <pre>> curl http://localhost:5000/data?Value=Hello
+HTTP response status code 200 - OK
+Content :</pre>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">{
+    <span style="color: #007700">&quot;id&quot;</span>: <span style="color: #0000DD; font-weight: bold">0</span>,
+    <span style="color: #007700">&quot;value&quot;</span>: <span style="background-color: #fff0f0">&quot;Hello&quot;</span>
+}
+</pre></div>
+            <p>
+                Le problème vient du fonctionnement de la validation des paramètres d'entrée de type complexe.
+                Dans ce cas, une instance du type en entrée est créée et ses propriétés sont initialisées avec une valeur par défaut (fonctionnement standard en .NET).
+                Ensuite survient la validation, qui vérifie que les propriétés de l'instance avec <strong>[Required]</strong> ont une valeur différente de nulle.
+                Le problème étant que les propriétés de type non-nullable ne peuvent avoir la valeur nulle,
+                donc elles seront toujours différente de nulle et l'attribut <strong>[Required]</strong> est sans effet.
+            </p>
+            <p>
+                Si vous avez travaillé avec le classique ASP.NET, vous devez connaître le contournement à ce problème.
+                Il faut que les propriétés ayant l'attribut <strong>[Required]</strong> soit d'un type nullable :
+            </p>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #0000CC">[ApiController]</span>
+<span style="color: #0000CC">[Route(&quot;data&quot;)]</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">DataController</span> : ControllerBase
+{
+<span style="color: #0000CC">    [HttpGet]</span>
+    <span style="color: #008800; font-weight: bold">public</span> IActionResult <span style="color: #0066BB; font-weight: bold">Get</span>([FromQuery] Data data)
+    {
+        <span style="color: #008800; font-weight: bold">return</span> <span style="color: #0066BB; font-weight: bold">Ok</span>(data);
+    }
+
+    <span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">Data</span>
+    {
+<span style="color: #0000CC">        [Required]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">int?</span> Id { <span style="color: #008800; font-weight: bold">get</span>; <span style="color: #008800; font-weight: bold">set</span>; }
+<span style="color: #0000CC">        [Required]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">string</span> Value { <span style="color: #008800; font-weight: bold">get</span>; <span style="color: #008800; font-weight: bold">set</span>; }
+    }
+}
+</pre></div>
+            <p>
+                Dans ce cas, on retrouve le comportement désiré :
+            </p>
+            <pre>> curl http://localhost:5000/test
+HTTP response status code 400 - Bad Request
+Content :</pre>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">{
+    <span style="color: #007700">&quot;errors&quot;</span>: {
+        <span style="color: #007700">&quot;Id&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;The Id field is required.&quot;</span>
+        ],
+        <span style="color: #007700">&quot;Value&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;The Value field is required.&quot;</span>
+        ]
+    }
+}
+</pre></div>
+            <p>
+                Ce contournement, en plus d'être inélégant, a un défaut particulièrement pénible.
+                La propriété, étant requise, ne devrait pas pouvoir être nulle,
+                donc on devrait pouvoir l'utiliser directement sans danger.
+                Seulement les outils d'analyse ne le savent pas et vont générer des avertissements inutiles.
+                Inutiles... Pas vraiment et on va tout de même ajouter les vérifications nécessaires... Au cas où!
+            </p>
+            <p>
+
+                Voilà le petite souci avec l'attribut <strong>[Required]</strong> en ASP.NET Core.
+                Je sais que ce n'est qu'un petit détail, mais comme l'indique le proverbe :
+            </p>
+            <blockquote>
+                <p>
+                    <strong>
+                        Le diable est dans les détails
+                    </strong>
+                </p>
+                <footer>- Friedrich Nietzsche</footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>
