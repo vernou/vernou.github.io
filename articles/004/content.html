@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">19 février 2021</span>
+            <h2>ASP.Net Core : BindRequired... Une fausse bonne idée</h2>
+            <p>
+                <a href="../003/content.html">L'article précédent</a> présentait la principale limitation de l'attribut
+                <a href="https://docs.microsoft.com/fr-fr/dotnet/api/system.componentmodel.dataannotations.requiredattribute">[Required]</a>
+                en ASP.NET Core.
+                Pour combler cette limitation, l'attribut <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.modelbinding.bindrequiredattribute">[BindRequired]</a>
+                a été ajouté en renfort.
+                Mais est-ce vraiment salvateur?
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Deux chemins, un choix">
+                <figcaption>Deux chemins, l'un incommode mais ayant fait ses preuves, l'autre pratique... mais avec une déplaisante surprise</figcaption>
+            </figure>
+            <p>
+                Pour résumer brièvement le précédent article,
+                l'attribut <strong>[Required]</strong> permet d'assurer la présence d'un paramètre en entrée d'une action d'un contrôleur,
+                mais dans le cas d'un paramètre d'entrée de type complexe il fallait l'utiliser uniquement avec des propriétés de type nullable.
+                Donc, on se retrouve à déclarer nullable des propriétés requises par définition non-nullable... Un peu contradictoire, non?
+            </p>
+            <p>Heureusement, en ASP.NET Core l'attribut <strong>[BindRequired]</strong> vient à notre rescousse :</p>
+            <div
+                style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #0000CC">[ApiController]</span>
+<span style="color: #0000CC">[Route(&quot;data&quot;)]</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">DataController</span> : ControllerBase
+{
+<span style="color: #0000CC">    [HttpGet]</span>
+    <span style="color: #008800; font-weight: bold">public</span> IActionResult <span style="color: #0066BB; font-weight: bold">Get</span>([FromQuery]Data data)
+    {
+        <span style="color: #008800; font-weight: bold">return</span> <span style="color: #0066BB; font-weight: bold">Ok</span>(data);
+    }
+
+    <span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">Data</span>
+    {
+<span style="color: #0000CC">        [BindRequired]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">int</span> Id { <span style="color: #008800; font-weight: bold">get</span>; <span style="color: #008800; font-weight: bold">set</span>; }
+<span style="color: #0000CC">        [BindRequired]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">string</span> Value { <span style="color: #008800; font-weight: bold">get</span>; <span style="color: #008800; font-weight: bold">set</span>; }
+    }
+}</pre>
+            </div>
+            <p>
+                Ainsi, on retrouve le comportement désiré :
+            </p>
+            <pre>> curl http://localhost:5000/data
+HTTP response status code 400 - Bad Request
+Content :</pre>
+            <div
+                style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">{
+    <span style="color: #007700">&quot;errors&quot;</span>: {
+        <span style="color: #007700">&quot;Id&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;A value for the 'Id' parameter or property was not provided.&quot;</span>
+        ],
+        <span style="color: #007700">&quot;Value&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;A value for the 'Value' parameter or property was not provided.&quot;</span>
+        ]
+    }
+}</pre>
+            </div>
+            <p>Et cela fonctionne aussi pour des paramètres simples :</p>
+            <div
+                style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #0000CC">[ApiController]</span>
+<span style="color: #0000CC">[Route(&quot;data&quot;)]</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">DataController</span> : ControllerBase
+{
+<span style="color: #0000CC">    [HttpGet]</span>
+    <span style="color: #008800; font-weight: bold">public</span> IActionResult <span style="color: #0066BB; font-weight: bold">Get</span>([BindRequired] <span style="color: #333399; font-weight: bold">int</span> id, [BindRequired] <span style="color: #333399; font-weight: bold">string</span> <span style="color: #008800; font-weight: bold">value</span>)
+    {
+        <span style="color: #008800; font-weight: bold">return</span> <span style="color: #0066BB; font-weight: bold">Ok</span>(<span style="color: #008800; font-weight: bold">new</span> { id, <span style="color: #008800; font-weight: bold">value</span> });
+    }
+}</pre>
+            </div>
+            <pre>> curl http://localhost:5000/data
+HTTP response status code 400 - Bad Request
+Content :</pre>
+            <div
+                style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">{
+    <span style="color: #007700">&quot;errors&quot;</span>: {
+        <span style="color: #007700">&quot;id&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;A value for the 'id' parameter or property was not provided.&quot;</span>
+        ],
+        <span style="color: #007700">&quot;value&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;A value for the 'value' parameter or property was not provided.&quot;</span>
+        ]
+    }
+}</pre>
+            </div>
+            <p>
+                Le message d'erreur n'est pas exactement le même qu'avec <strong>[Required]</strong>, mais il reste similaire.
+                Puis le code de retour est 400 (Bad Request), ce qui est le principal.
+                La solution serait d'utiliser l'attribut <strong>[BindRequired]</strong> au lieu de l'attribut <strong>[Required]</strong>.
+            </p>
+            <p>
+                Mais comme le laissé préjugé le titre de l'article, <strong>[BindRequired]</strong> a aussi ces défauts.
+                Premièrement il provient du package NuGet <strong>Microsoft.AspNetCore.Mvc.Core</strong>,
+                une dépendance lourde si le modèle est réutilisé en dehors d'application Web.
+            </p>
+            <p>
+                Autre problème, l'attribut ne fonctionne pas dans certains cas :
+            </p>
+            <div
+                style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #0000CC">[ApiController]</span>
+<span style="color: #0000CC">[Route(&quot;data&quot;)]</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">DataController</span> : ControllerBase
+{
+<span style="color: #0000CC">    [HttpPost]</span>
+    <span style="color: #008800; font-weight: bold">public</span> IActionResult <span style="color: #0066BB; font-weight: bold">Post</span>([FromBody] Data data)
+    {
+        <span style="color: #008800; font-weight: bold">return</span> <span style="color: #0066BB; font-weight: bold">Ok</span>(data);
+    }
+
+    <span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">Data</span>
+    {
+<span style="color: #0000CC">        [BindRequired]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">int</span> Id { <span style="color: #008800; font-weight: bold">get</span>; <span style="color: #008800; font-weight: bold">set</span>; }
+<span style="color: #0000CC">        [BindRequired]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">string</span> Value { <span style="color: #008800; font-weight: bold">get</span>; <span style="color: #008800; font-weight: bold">set</span>; }
+    }
+}</pre>
+            </div>
+            <pre>> curl http://localhost:5000/data -H  "Content-Type: application/json" -d "{}"
+HTTP response status code 200 - OK
+Content :</pre>
+            <div
+                style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">{
+    <span style="background-color: #fff0f0">&quot;id&quot;</span>: <span style="color: #6600EE; font-weight: bold">0</span>,
+    <span style="background-color: #fff0f0">&quot;value&quot;</span>: <span style="color: #008800; font-weight: bold">null</span>
+}</pre>
+            </div>
+            <p>Comme l'indique <a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/models/model-binding?view=aspnetcore-5.0">la documentation</a> :</p>
+            <blockquote class="quote">
+                Note that this <strong>[BindRequired]</strong> behavior applies to model binding from posted form data, not to JSON or XML data in a request body.
+                Request body data is handled by input formatters.
+                <hr>
+                Notez que ce comportement de [BindRequired] s’applique à la liaison de modèle des données de formulaire postées,
+                et non aux données JSON ou XML d’un corps de requête.
+                Les données du corps de requête sont prises en charge par les formateurs d’entrée.
+            </blockquote>
+            <p>
+                Lorsque les paramètres proviennent du contenu de la requête sous forme JSON ou XML,
+                alors c'est le désérialiseur qui s'occupe d'initialiser les paramètres.
+                Seulement ces derniers n'ont pas connaissance de l'attribut <strong>[BindRequired]</strong> et l'ignorent.
+                Comme avec <strong>[Required]</strong>, <strong>[BindRequired]</strong> ne fonctionne pas dans tous les cas.
+            </p>
+            <p>
+                En outre, le développeur se retrouve à jongler entre plusieurs attributs pour un besoin similaire,
+                ce qui entraine de la confusion.
+                Si vous en doutez, voici une liste non exhaustive de ticket ouvert à l'équipe ASP.NET Core de Microsoft à ce sujet :
+            </p>
+            <p>
+                <ul>
+                    <li>
+                        <a href="https://github.com/aspnet/Mvc/issues/8631">
+                            [BindRequired] validation attribute does not work in case of [FromBody] model binder
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/aspnet/Mvc/issues/7271">
+                            ModelState.IsValid on built-in type which has BindRequired, validate successfully when value hasn't been provided in the Json body
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/RicoSuter/NSwag/issues/2710">
+                            BindRequired vs. Required
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/aspnet/Mvc/issues/7528">
+                            ApiController: Problems with Parameter Validation
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/aspnet/Mvc/issues/7815">
+                            Validation of required non-nullable model properties
+                        </a>
+                    </li>
+                    <li>
+                        ...
+                    </li>
+                </ul>
+            </p>
+            <p>
+                Mais le problème majeur, c'est que le problème initial n'est pas résolu.
+                Il reste des cas où la vérification n'est pas effective.
+                <strong>[BindRequired]</strong> ne permet pas de vérifier la présence d'un paramètre de type non-nullable,
+                si ce dernier provient du contenu de la requête sous forme JSON ou XML.
+                Dans ce cas, il faut utiliser les fonctionnalités du désérialiseur.
+            </p>
+            <p>
+                Par exemple avec le désérialiseur est <a href="https://www.newtonsoft.com/json">Json.Net</a>, il faut utiliser l'attribut
+                <a href="https://www.newtonsoft.com/json/help/html/T_Newtonsoft_Json_JsonPropertyAttribute.htm">[JsonProperty]</a> avec l'option
+                <a href="https://www.newtonsoft.com/json/help/html/T_Newtonsoft_Json_Required.htm">Required.Always</a> :
+            </p>
+            <!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #0000CC">[ApiController]</span>
+<span style="color: #0000CC">[Route(&quot;data&quot;)]</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">DataController</span> : ControllerBase
+{
+<span style="color: #0000CC">    [HttpGet]</span>
+    <span style="color: #008800; font-weight: bold">public</span> IActionResult <span style="color: #0066BB; font-weight: bold">Get</span>([FromQuery] Data data)
+    {
+        <span style="color: #008800; font-weight: bold">return</span> <span style="color: #0066BB; font-weight: bold">Ok</span>(data);
+    }
+
+<span style="color: #0000CC">    [HttpPost]</span>
+    <span style="color: #008800; font-weight: bold">public</span> IActionResult <span style="color: #0066BB; font-weight: bold">Post</span>([FromBody] Data data)
+    {
+        <span style="color: #008800; font-weight: bold">return</span> <span style="color: #0066BB; font-weight: bold">Ok</span>(data);
+    }
+
+    <span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">Data</span>
+    {
+<span style="color: #0000CC">        [JsonProperty(Required = Required.Always)]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">int</span> Id { <span style="color: #008800; font-weight: bold">get</span>; <span style="color: #008800; font-weight: bold">set</span>; }
+<span style="color: #0000CC">        [JsonProperty(Required = Required.Always)]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">string</span> Value { <span style="color: #008800; font-weight: bold">get</span>; <span style="color: #008800; font-weight: bold">set</span>; }
+    }
+}
+</pre></div>
+<pre>> curl http://localhost:5000/data -H  "Content-Type: application/json" -d "{}"
+HTTP response status code 400 - Bad Request
+Content :</pre>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">{
+    <span style="color: #007700">&quot;errors&quot;</span>: {
+        <span style="color: #007700">&quot;id&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;Required property &#39;id&#39; not found in JSON. Path &#39;&#39;, line 1, position 2.&quot;</span>
+        ],
+        <span style="color: #007700">&quot;value&quot;</span>: [
+            <span style="background-color: #fff0f0">&quot;Required property &#39;value&#39; not found in JSON. Path &#39;&#39;, line 1, position 2.&quot;</span>
+        ]
+    }
+}
+</pre></div>
+            <p>
+                Et pour chaque désérialiseur c'est différent...
+                Quand ils le permettent, car certains désérialiseur n'ont pas cette fonctionnalité.
+                Par exemple, la récente bibliothèque <a href="">System.Text.Json</a>, qui remplace Json.NET, ne dispose pas de cette fonctionnalité.
+                Du moins pas en
+                <a href="https://docs.microsoft.com/fr-fr/dotnet/standard/serialization/system-text-json-migrate-from-newtonsoft-how-to?pivots=dotnet-5-0#required-properties">
+                    version 5
+                </a>, mais la fonctionnalité est en cours de <a href="https://github.com/dotnet/runtime/issues/29861">discussion</a> pour une probable futur implémentation.
+            </p>
+            <p>
+                En conclusion <strong>[Required]</strong> et <strong>[BindRequired]</strong> ont leurs propres défauts,
+                mais je conseille d'uniquement utiliser <strong>[Required]</strong> et rendre les propriétés requises nullable.
+                <strong>[Required]</strong> a l'avantage d'intervenir à la validation,
+                donc d'être isolé des mécanismes d'interprétation de la requête.
+                Finalement, la bonne vieille solution reste d'actualité, en plus d'être compatible avec le classique ASP.NET.
+            </p>
+            <blockquote>
+                <p>
+                    <strong>
+                        Il ne faut pas multiplier les épithètes sans nécessité; car tout mot qui n'est pas nécessaire nuit à la liaison.
+                    </strong>
+                </p>
+                <footer>- Etienne Bonnot de Condillac</footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>

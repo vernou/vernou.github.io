@@ -74,6 +74,13 @@ blockquote {
     border-radius: 5px;
 }
 
+.quote {
+    padding: 10px;
+    background-color: #289dcc;
+    color: #fff;
+    border-radius: 5px;
+}
+
 blockquote p {
     font-size: 25px;
     font-family: 'Open Sans', serif;
