@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">27 avril 2021</span>
+            <h2>ASP.Net Core 2.1 avec Entity Framework Core 3.1</h2>
+            <p>
+                <strong>.NET Core</strong> devient de plus en plus populaire.
+                Mais si comme moi vous travaillez avec des dépendances incompatibles,
+                alors vous êtes contraint de continuer d'utiliser <strong>.NET Framework</strong> pour encore un bon moment.
+                Heureusement, la plupart des composants ciblent <strong>.NET Standard</strong>, donc nous pouvons à avoir un avant goût.
+                Notamment avec le nouveau framework Web <strong>ASP.NET Core</strong> et le nouveau ORM <strong>Entity Framework Core</strong>.
+                Seulement ils ne semblent pas faire bon ménage ensemble.
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Une base solide est préférable avant d'ajouter d'autres éléments">
+                <figcaption>Une base solide est préférable avant d'ajouter d'autres éléments</figcaption>
+            </figure>
+            <blockquote class="quote">
+                Entity Framework Core 3.1 est la dernière version compatible avec .NET Framework.
+                Quand à ASP.NET Core, la version 2.2 est compatible avec .NET Framework, seulement le support a pris fin le 23 décembre 2019.
+                Quand au support ASP.NET Core 2.1, il prendra fin le samedi 21 août 2021 pour .NET Core.
+                <a href="https://dotnet.microsoft.com/platform/support/policy/aspnet">Par contre, il sera maintenue pour .NET Framework.</a>
+            </blockquote>
+            <p>
+                Lorsque l'on tente d'intégrer <strong>Entity Framework Core</strong> en version 3.1
+                à un projet <strong>ASP.NET Core 2.1</strong>, l'erreur suivante survient au démarrage :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">System.MethodAccessException:
+Attempt by method <span style="color: #BB4444">&#39;Microsoft.Extensions.Logging.Configuration.LoggerProviderConfigurationFactory.GetConfiguration(System.Type)&#39;</span> to access method <span style="color: #BB4444">&#39;Microsoft.Extensions.Logging.ProviderAliasUtilities.GetAlias(System.Type)&#39;</span> failed.
+at Microsoft.Extensions.Logging.Configuration.LoggerProviderConfigurationFactory.GetConfiguration<span style="color: #666666">(</span>Type providerType<span style="color: #666666">)</span>
+at Microsoft.Extensions.Logging.Configuration.LoggerProviderConfiguration<span style="color: #BB4444">`</span>1..ctor<span style="color: #666666">(</span>ILoggerProviderConfigurationFactory providerConfigurationFactory<span style="color: #666666">)</span>
+--- End of stack trace from previous location where exception was thrown ---
+at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw<span style="color: #666666">()</span>
+at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor<span style="color: #666666">(</span>ConstructorCallSite constructorCallSite, RuntimeResolverContext context<span style="color: #666666">)</span>
+...
+at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<span style="color: #666666">[</span>T<span style="color: #666666">](</span>IServiceProvider provider<span style="color: #666666">)</span>
+at Microsoft.AspNetCore.Hosting.WebHostBuilder.Build<span style="color: #666666">()</span>
+at WebApplication11.Program.Main<span style="color: #666666">(</span>String<span style="color: #666666">[]</span> args<span style="color: #666666">)</span></pre>
+            </div>
+
+            <p>
+                Pour reproduire cette erreur, c'est plutôt simple.
+                Dans un premier temps, il faut créer un projet de type <strong>ASP.NET Core</strong> ciblant <strong>.NET Framework</strong>.
+            </p>
+            <ul>
+                <li>Créer un nouveau projet avec Visual Studio</li>
+                <li>Choisir la template <strong>ASP.NET Core empty</strong></li>
+                <li>Choisir <strong>.NET Core 2.1</strong></li>
+                <li>Cocher <strong>Run on .NET Framework</strong></li>
+            </ul>
+            <img src="picture1.jpg" alt="Création d'un projet ASP.NET Core avec .NET Framework">
+            <p>
+                Ensuite, il faut ajouter le package NuGet
+                <a href="https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/3.1.14">Microsoft.EntityFrameworkCore en version 3.1.14</a>:
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">dotnet add package Microsoft.EntityFrameworkCore --version 3.1.14</pre>
+            </div>
+            <p>
+                Finalement, il suffit de démarrer l'application Web pour révéler l'erreur :
+            </p>
+                        <!-- HTML generated using hilite.me -->
+                        <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                            <pre style="margin: 0; line-height: 125%">System.MethodAccessException:
+Attempt by method <span style="color: #BB4444">&#39;Microsoft.Extensions.Logging.Configuration.LoggerProviderConfigurationFactory.GetConfiguration(System.Type)&#39;</span> to access method <span style="color: #BB4444">&#39;Microsoft.Extensions.Logging.ProviderAliasUtilities.GetAlias(System.Type)&#39;</span> failed.</pre>
+            </div>
+            <p>
+                Il semble que le WebHost ne parvienne pas à charger la configuration du logging.
+                Pour comprendre le problème, voici les dépendances d'ASP.NET Core et d'Entity Framework qui entre en jeu :
+            </p>
+            <ul>
+                <li><a href="https://www.nuget.org/packages/Microsoft.AspNetCore/2.1.7">Microsoft.AspNetCore 2.1.7</a>
+                    <ul>
+                        <li>Microsoft.Extensions.Logging 2.1.1</li>
+                        <li>Microsoft.Extensions.Logging.Configuration 2.1.1</li>
+                    </ul>
+                </li>
+                <li><a href="https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/3.1.14">Microsoft.EntityFrameworkCore 3.1.14</a>
+                    <ul>
+                        <li>Microsoft.Extensions.Logging 3.1.14</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>
+                La dépendance <strong>Microsoft.Extensions.Logging</strong> est présent dans l'arbre de dépendance avec deux versions différentes.
+                Comme le projet ne spécifie pas explicitement une version, alors c'est la version la plus élevée qui sera utilisée.
+                Donc le projet Web aura les dépendances suivantes :
+            </p>
+            <ul>
+                <li><a href="https://www.nuget.org/packages/Microsoft.Extensions.Logging/3.1.14">Microsoft.Extensions.Logging 3.1.14</a></li>
+                <li><a href="https://www.nuget.org/packages/Microsoft.Extensions.Logging.Configuration/2.1.1">Microsoft.Extensions.Logging.Configuration 2.1.1</a></li>
+            </ul>
+            <p>
+                Si on se référe au message d'erreur, on constate que le problème vient du package <strong>Microsoft.Extensions.Logging.Configuration</strong>
+                qui utilise la méthode <strong>ProviderAliasUtilities.GetAlias</strong> du package <strong>Microsoft.Extensions.Logging</strong>.
+                Seulement, cette méthode était qui était présente dans
+                <a href="https://github.com/aspnet/Logging/blob/2.1.1/src/Microsoft.Extensions.Logging/ProviderAliasUtilities.cs#L14">
+                    la version 2.* du package Microsoft.Extensions.Logging
+                </a>
+                a été retirée à partir de la version 3.* du package <strong>Microsoft.Extensions.Logging</strong> pour être intégré directement à
+                <strong>Microsoft.Extensions.Logging.Configuration</strong> par
+                <a href="https://github.com/dotnet/extensions/blob/v3.1.14/src/Shared/src/ProviderAliasUtilities/ProviderAliasUtilities.cs">
+                    l'intermédiaire de sources partagées.
+                </a>
+            </p>
+            <p>
+                Pour cette raison, <strong>Microsoft.Extensions.Logging.Configuration</strong> en version 2.* n'est pas compatible avec
+                <strong>Microsoft.Extensions.Logging</strong> en version 3.*,
+                contrairement à ce qu'indique les informations NuGet du package :
+            </p>
+            <ul>
+                <li><a href="https://www.nuget.org/packages/Microsoft.Extensions.Logging.Configuration/2.1.1">Microsoft.Extensions.Logging.Configuration 2.1.1</a></li>
+                    <ul>
+                        <li>Microsoft.Extensions.Logging (>= 2.1.1)</li>
+                        <li>Microsoft.Extensions.Options.ConfigurationExtensions (>= 2.1.1)</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>
+                Pour résoudre l'erreur, il faut ajouter au projet explicitement la dépendance en version 3.* du package <strong>Microsoft.Extensions.Logging.Configuration</strong> :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">dotnet add package Microsoft.Extensions.Logging.Configuration --version 3.1.14</pre>
+            </div>
+            <blockquote>
+                <p>
+                    <strong>
+                        Dependency hell is a colloquial term for the frustration of some software users who have installed software packages
+                        which have dependencies on specific versions of other software packages.
+                    </strong>
+                </p>
+                <hr>
+                <p>
+                    <strong>
+                        L'enfer des dépendances est un terme familier pour désigner la frustration de certains utilisateurs de logiciels qui ont installé des logiciels
+                        qui ont des dépendances sur des versions spécifiques d'autres logiciels.
+                    </strong>
+                </p>
+                <footer>- <a href="https://en.wikipedia.org/wiki/Dependency_hell">Wikipedia</a></footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>
