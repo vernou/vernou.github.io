@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">4 août 2021</span>
+            <h2>Déployer une application .NET avec Squirrel.Windows</h2>
+            <p>
+                En conséquence à la COVID 19, le nombre de collaborateur en télétravail à exploser.
+                Nous avons dû adapter nos applications pour les déployer sur la flotte grandissante d'ordinateur portable.
+                Dans ce cadre, nous avons opté pour <strong>Squirrel.Windows</strong> pour gérer l'installation et les mises à jour.
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Deux chemins, un choix">
+                <figcaption></figcaption>
+            </figure>
+            <h3>Quésaco?</h3>
+            <p>
+                <a href="https://github.com/Squirrel/Squirrel.Windows">Squirrel</a>
+                est un outil facilitant l'installation et la mise à jour d'une application bureau sur Windows.
+                <strong>Squirrel.Windows</strong> est maintenue dans GitHub sous la <a href="https://github.com/Squirrel/Squirrel.Windows/blob/develop/COPYING">licence MIT</a>.
+            </p>
+            <h3>Obsolète?</h3>
+            <p>
+                L'avenir de Squirrel est incertain.
+                Comme il est indiqué dans le ticket <a href="https://github.com/Squirrel/Squirrel.Windows/issues/1469">DEPRECATED, sad... #1469</a>,
+                la principale mainteneuse du projet ne semble pas pouvoir continuer à le maintenir.
+                Malgré cela, nous avons décidés d'utiliser <strong>Squirrel.Windows</strong>.
+            </p>
+            <p>
+                <strong>Squirrel.Windows</strong> est un projet stable et fonctionnel.
+                Mais le plus convaincant, c'est que le projet est sous la licence MIT, une licence libre très permissive.
+                Ainsi, nous pouvions très bien faire un fork pour appliquer des correctifs ou adapter l'outil à notre besoin.
+            </p>
+            <p>
+                De même, il est fort probable qu'une autre société reprenne le flambeau, car la majorité des applications développées avec Electron
+                <a href="https://www.electron.build/configuration/squirrel-windows">utilise Squirrel</a>
+                pour installer et mettre à jour sous Windows.
+                Notament des applications bien connues comme Discord, Slack, Teams, ...
+            </p>
+            <h3>1) Adapter l'application de burreau .NET</h3>
+            <p>
+                Contrairement à de nombreux outils similaires où un programme auxiliaire (launcher) qui s'occupe des mises à jour
+                <strong>Squirrel.Windows</strong> a la particularité que c'est l'application elle-même qui va se mettre à jour.
+                En avantage, on peut adapter le processus de mise à jour à notre besoin.
+                En contrepartie, il faut modifier le code de l'application pour implémenter la mise à jour.
+                Hereusement, <strong>Squirrel.Windows</strong> par son package NuGet nous facilite le travail.
+            </p>
+            <p>
+                Pour cette démonstration, nous allons créer une nouvelle application WPF en .NET Framework :
+            </p>
+            <img src="picture1.png" alt="Création d'un projet WPF avec .NET Framework">
+            <blockquote class="quote">
+                Lorsque Squirrel.Windows va générer le raccourcis bureau, les exécutables où le nom contient "Squirrel" seront ignorés.
+                Je déconseille fortement d'utiliser le terme "Squirrel" dans le nom du projet.
+                <a href="https://github.com/Squirrel/Squirrel.Windows/issues/1651">Le ticket GitHub suivant</a> approfondit ce point.
+            </blockquote>
+            <p>
+                Ensuite, il faut ajouter le package NuGet
+                <a href="https://www.nuget.org/packages/squirrel.windows">Microsoft.EntityFrameworkCore</a>:
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">PM> Install-Package squirrel.windows</pre>
+            </div>
+            <p>
+                Généralement, les applications disposent d'un bouton pour vérifier qu'une mise à jour est disponible.
+                Mais il est aussi possible d'utiliser un timer qui va régulièrement vérifier si une mise à jour est disponible.
+            </p>
+            <p>
+                Pour simplifier la démonstration, la mise à jour sera effectuée au démarrage de l'application, donc dans <strong>App.xaml.cs</strong> :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+            <pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">partial</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">App</span> : Application
+{
+    <span style="color: #008800; font-weight: bold">protected</span> <span style="color: #008800; font-weight: bold">override</span> <span style="color: #008800; font-weight: bold">async</span> <span style="color: #008800; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">OnStartup</span>(StartupEventArgs e)
+    {
+        <span style="color: #008800; font-weight: bold">using</span> (<span style="color: #333399; font-weight: bold">var</span> updateManager = <span style="color: #008800; font-weight: bold">new</span> UpdateManager(<span style="background-color: #fff0f0">@&quot;C:\SquiDemoReleases&quot;</span>))
+        {
+            <span style="color: #333399; font-weight: bold">var</span> releaseEntry = <span style="color: #008800; font-weight: bold">await</span> updateManager.UpdateApp();
+        }
+        <span style="color: #333399; font-weight: bold">var</span> main = <span style="color: #008800; font-weight: bold">new</span> MainWindow();
+        main.Show();
+    }
+}</pre>
+        </div>
+        <blockquote class="quote">
+            Généralement, l'application et les mises à jour sont déployées sur un serveur web et le chemin d'accès est une URL.
+            Dans l'exemple, les mises à jour seront stockées en local dans le dossier "C:\SquiDemoReleases".
+        </blockquote>
+            <p>
+                La méthode <strong>UpdateApp</strong> effectue les actions suivantes :
+            </p>
+            <ul>
+                <li>Vérifie si une mise à jour est disponible</li>
+                <li>Télécharge la mise à jour</li>
+                <li>Installe la mise à jour</li>
+            </ul>
+            <p>
+                Il s'agit de la manière la plus simple pour effectuer la mise à jour.
+                Pour les scénarios plus avancées, <strong>UpdateManager</strong> dispose d'autres méthodes pour décomposer chaque étape.
+            </p>
+            <p>
+                Une fois l'application mis à jour, il faut que l'application redémarre pour exécuter la dernière version.
+                Pour cela, la méthode <strong>UpdateApp</strong> retourne comme information la version installée ou nulle si aucune nouvelle version était disponible.
+                Ensuite, la méthode <strong>RestartApp</strong> permet de redémarrer l'application en dernière version.
+                Ainsi, la méthode <strong>OnStartup</strong> devient :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+            <pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">protected</span> <span style="color: #008800; font-weight: bold">override</span> <span style="color: #008800; font-weight: bold">async</span> <span style="color: #008800; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">OnStartup</span>(StartupEventArgs e)
+{
+    ReleaseEntry releaseEntry;
+    <span style="color: #008800; font-weight: bold">using</span> (<span style="color: #333399; font-weight: bold">var</span> updateManager = <span style="color: #008800; font-weight: bold">new</span> UpdateManager(<span style="background-color: #fff0f0">@&quot;C:\SquiDemoReleases&quot;</span>))
+    {
+        releaseEntry = <span style="color: #008800; font-weight: bold">await</span> updateManager.UpdateApp();
+    }
+    <span style="color: #888888">// Restart after UpdateManager is disposed</span>
+    <span style="color: #008800; font-weight: bold">if</span> (releaseEntry != <span style="color: #008800; font-weight: bold">null</span>)
+    {
+        UpdateManager.RestartApp();
+    }
+
+    <span style="color: #333399; font-weight: bold">var</span> main = <span style="color: #008800; font-weight: bold">new</span> MainWindow();
+    main.Show();
+}</pre>
+            </div>
+            <blockquote class="quote">
+                Il est nécessaire de libérer les instances UpdateManager avant de redémarrer l'application.
+                <a href="https://github.com/Squirrel/Squirrel.Windows/issues/1371">Le ticket GitHub suivant</a> approfondit ce point.
+            </blockquote>
+            <h3>2) Générer l'application</h3>
+            <p>
+                Pour générer l'application et les mises à jour, il faut dans un premier temps générer un package NuGet intermédiaire contenant l'application.
+                Le plus simple étant d'ajouter au projet un fichier <strong>.nuspec</strong> :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #557799">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
+    <span style="color: #007700">&lt;package&gt;</span>
+    <span style="color: #007700">&lt;metadata&gt;</span>
+        <span style="color: #007700">&lt;id&gt;</span>SquiDemoId<span style="color: #007700">&lt;/id&gt;</span>
+        <span style="color: #007700">&lt;title&gt;</span>SquiDemo Title<span style="color: #007700">&lt;/title&gt;</span>
+        <span style="color: #007700">&lt;version&gt;</span>1.0.0<span style="color: #007700">&lt;/version&gt;</span>
+        <span style="color: #007700">&lt;description&gt;</span>Demo with Squirrel.Windows<span style="color: #007700">&lt;/description&gt;</span>
+        <span style="color: #007700">&lt;authors&gt;</span>Space Monkey<span style="color: #007700">&lt;/authors&gt;</span>
+    <span style="color: #007700">&lt;/metadata&gt;</span>
+    <span style="color: #007700">&lt;files&gt;</span>
+        <span style="color: #007700">&lt;file</span> <span style="color: #0000CC">src=</span><span style="background-color: #fff0f0">&quot;*.*&quot;</span> <span style="color: #0000CC">target=</span><span style="background-color: #fff0f0">&quot;lib\net45\&quot;</span> <span style="color: #0000CC">exclude=</span><span style="background-color: #fff0f0">&quot;*.pdb;*.vshost.*&quot;</span><span style="color: #007700">/&gt;</span>
+    <span style="color: #007700">&lt;/files&gt;</span>
+<span style="color: #007700">&lt;/package&gt;</span>
+</pre></div>
+            <p>
+                La balise "id" sert à définir plusieurs paramètres comme le dossier d'installation.
+                Pour ce paramètre, il faut utiliser uniquement des caractères alphanumériques (même l'espace est proscrit).
+                Par la suite, "[NuGet Id]" indiquera que la valeur provient de ce paramètre.
+            </p>
+            <p>
+                La balise "title" sert à définir plusieurs paramètres comme le nom de l'application dans Windows.
+                Par la suite, "[NuGet Title]" indiquera que la valeur provient de ce paramètre.
+            </p>
+            <p>
+                La balise "file" indique les fichiers de l'application.
+                Il est nécessaire de placer les fichiers dans "lib\net45",
+                car <strong>Squirrel.Windows</strong> récupère les fichiers uniquement dans ce dossier.
+            </p>
+            <p>
+                D'autres balises nuspec sont utilisées par <strong>Squirrel.Windows</strong>, vous pouvez retrouver la liste au lien suivant :
+                <a href="https://github.com/Squirrel/Squirrel.Windows/blob/develop/docs/using/nuget-package-metadata.md">NuGet Package Metadata</a>
+            </p>
+            <p>
+                Ensuite, il faut compiler le projet en Release,
+                puis exécuter la commande suivante pour générer le package intermédiaire (dans l'exemple "SquiDemoId.1.0.0.nupkg") :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">PM> nuget pack SquiDemo.nuspec -BasePath .\bin\Release</pre>
+            </div>
+            <p>
+                Finalement, la commande suivante permet de générer les fichiers pour déployer et mettre à jour l'application :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">PM> Squirrel --releasify SquiDemoId.1.0.0.nupkg --releaseDir="C:\SquiDemoReleases"</pre>
+            </div>
+            <blockquote class="quote">
+                L'instruction Squirrel provient du package NuGet Squirrel.Windows.
+                Elle est donc disponible depuis Package Manager Console dans Visual Studio.
+                Il est aussi possible de télécharger le package NuGet Squirrel.Windows et d'extraire l'utilitaire.
+            </blockquote>
+            <p>
+                Cela va générer les fichiers suivants :
+                <ul>
+                    <li><strong>RELEASES</strong> : Un fichier texte référençant les versions disponibles de l'application.</li>
+                    <li><strong>Setup.exe</strong> : Un exécutable permettant d'installer l'application pour un utilisateur.</li>
+                    <li><strong>Setup.msi</strong> : Un installeur pour déployer l'application à tous les utilisateurs.</li>
+                    <li><strong>SquiDemoId-1.0.0-full.nupkg</strong> : L'application empaqueté au format NuGet.</li>
+                </ul>
+            </p>
+            <h3>3) Déployer l'application (optionnel)</h3>
+            <p>
+                Le fichier <strong>Setup.msi</strong> permet de déployer l'application à l'ensemble des utilisateurs du poste.
+                Il n'installe pas l'application, mais lorsqu'un utilisateur ouvrira sa session l'installation démarrera automatiquement.
+                C'est la méthode à privilégier pour déployer par Group Policy ou avec un outil de gestion de parc comme Microsoft Intune.
+            </p>
+            <p>
+                Il déploie le fichier "Setup.exe" en :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">C:\Program Files (x86)\[NuGet Title] Deployment\[NuGet Id]DeploymentTool.exe</pre>
+            </div>
+            <p>Ce qui donne dans notre exemple : </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">C:\Program Files (x86)\SquiDemo Title Deployment\SquiDemoIdDeploymentTool.exe</pre>
+            </div>
+            <p>
+                Ensuite, il ajouter à la clé de registre :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run\[NuGet Id]Deployment" :
+    "C:\Program Files (x86)\[NuGet Title]] Deployment\[NuGet Id]DeploymentTool.exe" --checkInstall</pre>
+            </div>
+            <p>Ce qui donne dans notre exemple : </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">"HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run\SquiDemoIdDeployment" :
+    "C:\Program Files (x86)\SquiDemo Title Deployment\SquiDemoIdDeploymentTool.exe" --checkInstall</pre>
+            </div>
+            <p>
+                Cette clé de registre permet d'exécuter à chaque ouverture de session d'un utilisateur la commande ci-dessus.
+                La commande quant à elle permet de vérifier si l'application est installée et dans le cas échéant d'effectuer l'installation.
+            </p>
+            <h3>4) Installer l'application</h3>
+            <p>
+                Le fichier <strong>Setup.exe</strong> permet d'installer l'application. L'installation va :
+                <ul>
+                    <li>
+                        Créer le dossier "%LocalAppData%\[NuGet Id]" et y ajoute :
+                        <ul>
+                            <li>"app-[NuGet Version]" qui est un dossier contenant les fichiers de l'application</li>
+                            <li>"package" qui est un dossier servant de cache pour Squirrel.Windows</li>
+                            <li>"[App Executable]" qui démarre l'application en dernière version</li>
+                            <li>"Update.exe" qui est une copie de l'utilitaire "Squirrel.exe"</li>
+                        </ul>
+                        <figure class="articleimg">
+                            <img src="picture2.png" alt="Contenu du dossier d'installation">
+                            <figcaption>Contenu pour l'application de démonstration</figcaption>
+                        </figure>
+                    </li>
+                    <li>
+                        Créer un raccourcis sur le bureau "[App Executable]" vers "%LocalAppData%\[NuGet Id]\[App Executable]""
+                    </li>
+                    <li>
+                        Enregistre l'application dans le registre Windows avec la procédure de désinstallation
+                    </li>
+                </ul>
+            </p>
+            <p>
+                L'application est installée et peut-être démarrer à partir du raccourcis présent sur le bureau.
+            </p>
+            <h3>5) Mise à jour</h3>
+            <p>
+                Maintenant que l'application est installée, il est possible de déployer une mise à jour.
+                On commence par générer le package intermédiaire en précisant la nouvelle version :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">PM> nuget pack SquiDemo.nuspec -BasePath .\bin\Release -Version 1.1.0</pre>
+            </div>
+            <p>
+                Puis, on génére la nouvelle version :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">PM> Squirrel --releasify SquiDemoId.1.1.0.nupkg --releaseDir="C:\SquiDemoReleases"</pre>
+            </div>
+            <p>
+                Cela va générer les fichiers suivants :
+            </p>
+            <ul>
+                <li>RELEASES : Met à jour pour intégrer les informations de la nouvelle version.</li>
+                <li>Setup.exe : Régénération pour intégrer la nouvelle version.</li>
+                <li>Setup.msi : Régénération pour intégrer la nouvelle version.</li>
+                <li>SquiDemoId-1.1.0-full.nupkg : La nouvelle version de l'application empaqueté au format NuGet.</li>
+                <li>SquiDemoId-1.1.0-delta.nupkg : Le différentiel entre l'ancienne et la nouvelle version de l'application au format NuGet.</li>
+            </ul>
+            <p>
+                Maintenant que la mise à jour est disponible, au prochain démarrage l'application se mettra à jour.
+            </p>
+            <h3>6) Désintallation</h3>
+            <p>
+                Comme l'application a été enregistrée dans Windows, il est possible de la désinstaller à partir "Programs and Features".
+            </p>
+            <p>
+                Aussi, il est possible d'exécuter la commande :
+            </p>
+            <pre>"%LocalAppData%\[NuGet Id]\Update.exe" --uninstall .</pre>
+            <p>
+                La désinstallation supprime tous les fichiers or ni "%LocalAppData%\[NuGet Id]\Update.exe".
+                <a href="https://github.com/Squirrel/Squirrel.Windows/issues/1694">Le ticket GitHub suivant</a> approfondit ce point.
+            </p>
+            <blockquote>
+                <p>
+                    <strong>
+                        Squirrel, it's like ClickOnce but Works
+                    </strong>
+                </p>
+                <footer>- From README</footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>
