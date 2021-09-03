@@ -60,31 +60,32 @@ at WebApplication11.Program.Main<span style="color: #666666">(</span>String<span
                 Pour reproduire cette erreur, c'est plutôt simple.
                 Dans un premier temps, il faut créer un projet de type <strong>ASP.NET Core</strong> ciblant <strong>.NET Framework</strong>.
             </p>
-            <ul>
-                <li>Créer un nouveau projet avec Visual Studio</li>
-                <li>Choisir la template <strong>ASP.NET Core empty</strong></li>
-                <li>Choisir <strong>.NET Core 2.1</strong></li>
-                <li>Cocher <strong>Run on .NET Framework</strong></li>
-            </ul>
-            <img src="picture1.jpg" alt="Création d'un projet ASP.NET Core avec .NET Framework">
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">&gt; dotnet new web --name WebDemo --target-framework-override net48
+&gt; cd WebDemo</pre>
+            </div>
             <p>
                 Ensuite, il faut ajouter le package NuGet
-                <a href="https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/3.1.14">Microsoft.EntityFrameworkCore en version 3.1.14</a>:
+                <a href="https://www.nuget.org/packages/Microsoft.EntityFrameworkCore/3.1.18">Microsoft.EntityFrameworkCore en version 3.1.18</a>:
             </p>
             <!-- HTML generated using hilite.me -->
             <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
-                <pre style="margin: 0; line-height: 125%">dotnet add package Microsoft.EntityFrameworkCore --version 3.1.14</pre>
+                <pre style="margin: 0; line-height: 125%">&gt; dotnet add package Microsoft.EntityFrameworkCore --version 3.1.18</pre>
             </div>
             <p>
                 Finalement, il suffit de démarrer l'application Web pour révéler l'erreur :
             </p>
-                        <!-- HTML generated using hilite.me -->
-                        <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
-                            <pre style="margin: 0; line-height: 125%">System.MethodAccessException:
-Attempt by method <span style="color: #BB4444">&#39;Microsoft.Extensions.Logging.Configuration.LoggerProviderConfigurationFactory.GetConfiguration(System.Type)&#39;</span> to access method <span style="color: #BB4444">&#39;Microsoft.Extensions.Logging.ProviderAliasUtilities.GetAlias(System.Type)&#39;</span> failed.</pre>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">&gt; dotnet run
+
+System.MethodAccessException:
+Attempt by method <span style="color: #BB4444">&#39;Microsoft.Extensions.Logging.Configuration.LoggerProviderConfigurationFactory.GetConfiguration(System.Type)&#39;</span> to access method <span style="color: #BB4444">&#39;Microsoft.Extensions.Logging.ProviderAliasUtilities.GetAlias(System.Type)&#39;</span> failed.
+...</pre>
             </div>
             <p>
-                Il semble que le WebHost ne parvienne pas à charger la configuration du logging.
+                Il semble que WebHost ne parvienne pas à charger la configuration du logging.
                 Pour comprendre le problème, voici les dépendances d'ASP.NET Core et d'Entity Framework qui entre en jeu :
             </p>
             <ul>
@@ -136,11 +137,12 @@ Attempt by method <span style="color: #BB4444">&#39;Microsoft.Extensions.Logging
                 </li>
             </ul>
             <p>
-                Pour résoudre l'erreur, il faut ajouter au projet explicitement la dépendance en version 3.* du package <strong>Microsoft.Extensions.Logging.Configuration</strong> :
+                Pour résoudre l'erreur, il faut ajouter au projet explicitement la dépendance en version 3.* du package
+                <strong>Microsoft.Extensions.Logging.Configuration</strong> :
             </p>
             <!-- HTML generated using hilite.me -->
             <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
-                <pre style="margin: 0; line-height: 125%">dotnet add package Microsoft.Extensions.Logging.Configuration --version 3.1.14</pre>
+                <pre style="margin: 0; line-height: 125%">&gt; dotnet add package Microsoft.Extensions.Logging.Configuration --version 3.1.18</pre>
             </div>
             <blockquote>
                 <p>
