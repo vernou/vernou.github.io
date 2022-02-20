@@ -79,6 +79,7 @@ blockquote {
     background-color: #289dcc;
     color: #fff;
     border-radius: 5px;
+    text-align: justify;
 }
 
 blockquote p {
