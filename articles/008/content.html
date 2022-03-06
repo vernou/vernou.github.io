@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">03 mars 2022</span>
+            <h2>
+                La politique de support pour ASP.NET Core 2.1
+            </h2>
+            <p>
+                Selon la politique de support de Microsoft, ASP.NET Core 2.1 est toujours supporté. Mais un matin, je constate avec horripilation dans la documentation d'ASP.NET Core, les sections concernant ASP.NET Core 2.1 ont disparu. Comme la documentation est une part du produit, qu'en est-il réellement du support de ce dernier?
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Échelle brisée">
+                <figcaption>
+                    Quand la documentation est manquante
+                </figcaption>
+            </figure>
+            <h3>Quelle version d'ASP.NET Core faut-il utiliser avec .NET Framework?</h3>
+            <p>
+                Comme dans beaucoup d'entreprise utilisant .NET depuis longtemps, nous avons des dépendances incompatibles avec le nouveau .NET Core. Par conséquent, nous sommes contraints de continuer d'utiliser l'historique .NET Framework. Subséquemment, nous ne pouvons pas utiliser la dernière version d'ASP.NET Core.
+             </p>
+            <p>
+                La dernière version compatible avec .NET Framework est ASP.NET Core 2.2, seulement son support a pris fin le 23 décembre 2019. Quant à ASP.NET Core 2.1, son support a pris fin le samedi 21 août 2021 pour .NET Core. <a href="https://dotnet.microsoft.com/platform/support/policy/aspnet">Par contre, il est maintenu pour .NET Framework.</a>
+             </p>
+             <blockquote class="quote">
+                 To help facilitate migrating applications to ASP.NET Core on .NET Core, the following ASP.NET Core 2.1 (latest patched version only) <a href="https://dotnet.microsoft.com/en-us/platform/support/policy/aspnetcore-2.1">packages</a> will be supported on the .NET Framework and follow the <a href="https://support.microsoft.com/en-us/lifecycle/search?alpha=.net%20framework">support cycle</a><a> for those .NET Framework versions. ASP.NET Core 2.1 is defined as "Tools" in the Microsoft Support Lifecycle Policy. A "Tool" requires a minimum of 12 months notification prior to the end of support. For more information, please see </a><a href="https://docs.microsoft.com/troubleshoot/aspnet/support-lifecycle-web-stack?WT.mc_id=dotnet-35129-website" >this KB Article</a>.
+                 <hr>
+                 Pour faciliter la migration des applications vers ASP.NET Core sur .NET Core, <a href="https://dotnet.microsoft.com/en-us/platform/support/policy/aspnetcore-2.1">ASP.NET Core 2.1</a> (dernière version uniquement) sera pris en charge sur le .NET Framework et suivra <a href="https://support.microsoft.com/en-us/lifecycle/search?alpha=.net%20framework">le cycle de support</a> des versions de .NET Framework. ASP.NET Core 2.1 est défini comme « Outils » dans la politique de cycle de vie du support Microsoft. Un "Outil" nécessite un minimum de 12 mois de notification avant la fin du support. Pour plus d'informations, veuillez consulter <a href="https://docs.microsoft.com/troubleshoot/aspnet/support-lifecycle-web-stack?WT.mc_id=dotnet-35129-website" >cet article de la base de connaissances</a>.
+            </blockquote>
+            <p>
+                C'est pour ces raisons, que si vous êtes contraint d'utiliser .NET Framework, je recommande ASP.NET Core 2.1, pour profiter du support du produit.
+            </p>
+            <h3>Le drame</h3>
+            <p>
+                Après un travail acharné, je suis parvenu à évincer ces dépendances problématiques. Nous allons pouvoir migrer notre base de code vers ASP.NET Core 6. Mais avant cela, je dois réaliser une analyse de la migration.
+            </p>
+            <p>
+                Et à ce sujet, la documentation officielle d'ASP.NET Core regorge d'annotation, détaillant les différences de comportement d'une version à une autre. J'ai donc accompagné mon analyse de nombreuses références à cette documentation pour justifier certaines propositions.
+            </p>
+            <p>
+                Mais en relisant le rapport produit, je constate que les liens Web ne renvoi plus vers les informations pertinentes. De plus, je ne parviens pas à retrouver ces informations dans la documentation. Il semble que tous les éléments à propos des versions 2.X d'ASP.NET Core ont disparu.
+            </p>
+            <h3>L'enquête</h3>
+            <p>
+                Comme les sources de la documentation sont accessibles sur <a href="https://github.com/dotnet/AspNetCore.Docs">GitHub</a>, j'ai décidé de mener l'investigation. Il se trouve que la documentation ASP.NET Core a été nettoyée des portions à propos des versions 2.X, comme le montre le ticket GitHub suivant :
+            </p>
+            <p>
+                <a href="https://github.com/dotnet/AspNetCore.Docs/issues/24695">#24695 Drop 2.x content and sample apps</a>
+            </p>
+            <p>
+                Bien ASP.NET Core 2.X n'est plus supporté en .NET Core, ASP.NET Core 2.1 est toujours supporté en .NET Framework. Et j'insiste, la documentation est une part intégrante du produit. Donc, je trouve cette décision inconvenant. Alors, j'ai ouvert un ticket pour remonter le problème et demander le retour de la documentation ASP.NET Core 2.1 :
+            </p>
+            <p>
+                <a href="https://github.com/dotnet/AspNetCore.Docs/issues/25171">#25171 Rollback the ASP.NET Core 2.X content</a>
+            </p>
+            <p>
+                En toute franchise, je pensais que ma demande serait déclinée. Et bien non, en moins de 24h le contenu a été restauré. Je remercie <a href="https://github.com/Rick-Anderson">Rick Anderson</a> pour ce travail :
+            </p>
+            <p>
+                <a href="https://github.com/dotnet/AspNetCore.Docs/pull/25174">#25174 restore 2.2 Web API /1</a>
+            </p>
+            <h3>Support d'ASP.NET Core 2.1</h3>
+            <p>
+                Dans le ticket que j'ai ouvert, <a href="https://github.com/guardrex">Luke Latham</a> a soulevé un problème à propos de la spécification du support d'ASP.NET Core 2.1. Dans <a href="https://dotnet.microsoft.com/platform/support/policy/ aspnet">" la police de support d'ASP.NET</a>, il est indiqué :
+            </p>
+            <blockquote class="quote">
+                ASP.NET Core 2.1 is defined as "Tools" in the Microsoft Support Lifecycle Policy.
+                <hr>
+                ASP.NET Core 2.1 est défini comme « Outils » dans la politique de cycle de vie du support Microsoft.
+            </blockquote>
+            <p>
+                Seulement, dans la liste de ces outils, il n'y a pas ASP.NET Core 2.1:
+            </p>
+            <blockquote>
+                The following products are supported as Tools according to the Microsoft Support Lifecycle guidelines:
+                <ul>
+                    <li>
+                        ASP.NET Web Stack
+                        <ul>
+                            <li>ASP.NET MVC4</li>
+                            <li>ASP.NET Web API</li>
+                            <li>ASP.NET Web API 2</li>
+                            <li>ASP.NET Web Pages 2</li>
+                            <li>ASP.NET Web Pages 3</li>
+                        </ul>
+                    </li>
+                    <li>Entity Framework 6</li>
+                    <li>Microsoft OWIN</li>
+                    <li>Microsoft Web Developer Tools 2013</li>
+                    <li>ODataLib</li>
+                    <li>WCF RIA Services v1.0 SP2</li>
+                </ul>
+            </blockquote>
+            <p>
+                Par conséquent, ASP.NET Core 2.1 se retrouve avec <a href="https://docs.microsoft.com/en-us/lifecycle/products/microsoft-net-and-net-core">la politique de support classique de .NET Core 2.1</a>, soit que le support aurait pris fin le samedi 21 août 2021.
+            </p>
+            <p>
+                Face à cette incohérence, j'ai demandé des explications. <a href="https://github.com/dotnet/AspNetCore.Docs/issues/25171#issuecomment-1059499579">La réponse</a> a été :
+            </p>
+            <blockquote class="quote">
+                The entries listed for "Tools" don't include "ASP.NET Core 2.1" as the original post copied from the first doc. However, support will be maintained per PU management regardless of the incorrect remark in the doc.
+                <hr>
+                La liste des "outils" n'inclut pas "ASP.NET Core 2.1" contrairement à ce qui est indiqué dans la première documentation (fessant référence à <a href="https://dotnet.microsoft.com/platform/support/policy/aspnet">la politique de support d'ASP.NET</a>). Cependant, le support (d'ASP.NET Core 2.1) sera maintenue par l'équipe PU (product unit) en dépit de l'erreur indiquée en amont.
+            </blockquote>
+            <p>
+                Cela confirme que le support d'ASP.NET Core 2.1 est bien effectif pour .NET Framework.
+            </p>
+            <blockquote>
+                <p>
+                    <strong>
+                        La documentation constitue une partie importante de l'ingénierie logicielle, qui est souvent négligée.
+                    </strong>
+                </p>
+                <footer><a href="https://fr.wikipedia.org/wiki/Documentation_logicielle">Documentation logicielle</a> - Wikipédia</footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>
