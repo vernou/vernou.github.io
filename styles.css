@@ -66,14 +66,6 @@ p {
     text-justify: inter-word;
 }
 
-blockquote {
-    padding: 10px 30px 30px 30px;
-    margin-bottom: 20px;
-    background-color: #289dcc;
-    color: #fff;
-    border-radius: 5px;
-}
-
 .quote {
     padding: 10px;
     background-color: #289dcc;
@@ -82,7 +74,15 @@ blockquote {
     text-align: justify;
 }
 
-blockquote p {
+.end-quote {
+    padding: 10px 30px 30px 30px;
+    margin-bottom: 20px;
+    background-color: #289dcc;
+    color: #fff;
+    border-radius: 5px;
+}
+
+.end-quote p {
     font-size: 25px;
     font-family: 'Open Sans', serif;
     line-height: 1.4;
