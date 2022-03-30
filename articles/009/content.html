@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">20 février 2022</span>
+            <h2>
+                ASP.NET Core:
+                <br>
+                Retour automatique en cas d'erreur de validation
+            </h2>
+            <p>
+                Dans le cadre de mon travail, je prépare la migration de nos applications de .NET Framework vers .NET Core. Lors de mes tests, j'ai eu l'agréable surprise (c'est une antiphrase) de constater que dans les nouvelles versions d'ASP.NET Core, qu'en cas d'erreur de validation du modèle, le format de la réponse automatique avait changé. C'est pourquoi, je me suis plongé dans ce sujet.
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Cresonnière">
+                <figcaption>Cresonnière</figcaption>
+            </figure>
+            <h3>Bad Request, ou comment convier à reformuler</h3>
+            <p>
+                Selon le standard <a href="https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1">RFC 7231</a> :
+            </p>
+            <blockquote class="quote">
+                <p>
+                    The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).
+                </p>
+                <hr>
+                <p>
+                    Le code de statut de réponse HTTP 400 Bad Request indique que le serveur ne peut pas comprendre ou traiter la requête en raison d'une erreur côté client (par exemple une requête dont la syntaxe ou le contenu est invalide, ou encore que certaines informations sont anormales).
+                </p>
+            </blockquote>
+            <p>
+                Autrement dit, si un client émet une requête HTTP et que le serveur lui renvoie une réponse avec le code 400 (Bad Request), cela signifie que la requête est incorrecte. Le serveur peut intégrer dans la réponse des informations complémentaires qui peuvent permettre au client de corriger la requête pour ensuite la réémettre.
+            </p>
+            <p>
+                Ainsi, une application qui gère ce type de réponse, peut indiquer à l'utilisateur les champs ayant une valeur saisie incorrecte avec la raison du refus. Ainsi, l'utilisateur est en mesure de corriger les valeurs saisies incorrectes et de réexécuter l'opération.
+            </p>
+            <p>
+                Pour cela, il faut que l'application et le serveur soit en accord sur la forme du message. Si le serveur renvoie une réponse qui n'est pas interprétable par l'application, alors cette dernière ne pourra qu'afficherun message d'erreur générique... ce qui est frustrant pour l'utilisateur.
+            </p>
+            <h3>Retour automatique en cas d'erreur de validation</h3>
+            <p>
+                En ASP.NET Core, la validation du modèle est automatique. Par contre, il faut vérifier le résultat de cette validation et retourner la réponse adéquate. Dans la grande majorité des cas, il s'agit de retourner le <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.controllerbase.modelstate">ControllerBase.ModelState</a> qui comporte les erreurs de validation :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #7D9029">[Route(&quot;products&quot;)]</span>
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
+{
+<span style="color: #7D9029">    [HttpGet(&quot;{id}&quot;)]</span>
+    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">Get</span>(<span style="color: #B00040">int</span> id, [Required] <span style="color: #B00040">string</span> label)
+    {
+        <span style="color: #008000; font-weight: bold">if</span>(!ModelState.IsValid)
+        {
+            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">BadRequest</span>(ModelState);
+        }
+        <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>(<span style="color: #008000; font-weight: bold">new</span> { Id = id, Label = label });
+    }
+}</pre>
+            </div>
+            <p>
+                Par conséquent, la majorité des actions commencent par ce même bloc d'instruction :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">if</span>(!ModelState.IsValid)
+{
+    <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">BadRequest</span>(ModelState);
+}</pre>
+            </div>
+            <p>
+                Du moins, devraient... Puisque les développeurs d'ASP.NET Core ont ajouté l'attribut <a href="https://docs.microsoft.com/en-us/aspnet/core/web-api#apicontroller-attribute">[ApiController]</a> qui facilite le développement d'API en modifiant certain comportement d'ASP.NET Core. Notamment, en retournant automatiquement une réponse 400 (BadRequest) en cas d'erreur de validation du modèle. Ainsi, l'action présentée plutôt peut être simplifiée en :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #7D9029">[ApiController]</span>
+<span style="color: #7D9029">[Route(&quot;products&quot;)]</span>
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
+{
+<span style="color: #7D9029">    [HttpGet(&quot;{id}&quot;)]</span>
+    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">Get</span>(<span style="color: #B00040">int</span> id, [Required]<span style="color: #B00040">string</span> label)
+    {
+        <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>(<span style="color: #008000; font-weight: bold">new</span> { Id = id, Label = label });
+    }
+}</pre>
+            </div>
+            <p>
+                Seulement, comme introduit en préambule, le format de la réponse automatique suite à une erreure de validation varit en fonction de la version d'ASP.NET Core.
+            </p>
+            <h3>ASP.NET Core 2.1</h3>
+            <p>
+                En ASP.NET Core 2.1, la réponse automatique en cas d'erreur de validation est <strong>SerializableError</strong>, comme l'indique <a href="https://docs.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-2.1#automatic-http-400-responses">la documentation</a> :
+            </p>
+            <blockquote class="quote">
+                <p style="margin-bottom:10px">
+                    With a compatibility version of 2.1, the default response type for an HTTP 400 response is <strong>SerializableError</strong>.
+                </p>
+                <hr>
+                <p>
+                    Avec la compatibilité en version 2.1, le type de réponse automatique pour les erreurs HTTP 400 est <strong>SerializableError</strong>.
+                </p>
+            </blockquote>
+            <p>
+                <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.serializableerror">SerializableError</a> est un conteneur sérialisable pour <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.modelbinding.modelstatedictionary">ModelStateDictionary</a>. Cette classe permet de <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/SerializableError.cs#L30">convertir ModelStateDictionary en Dictionary&lt;string, string[]&gt;</a>. D'ailleurs, la méthode <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ControllerBase.cs#L1806">ControllerBase.BadRequest</a> créait un <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/BadRequestObjectResult.cs#L33">BadRequestObjectResult</a> qui transforme le <strong>ModelStateDictionary</strong> en <strong>SerializableError</strong> :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">abstract</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ControllerBase</span>
+{
+    <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">virtual</span> BadRequestObjectResult <span style="color: #0000FF">BadRequest</span>(ModelStateDictionary modelState)
+        =&gt; <span style="color: #008000; font-weight: bold">new</span> BadRequestObjectResult(modelState);
+}
+
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">BadRequestObjectResult</span> : ObjectResult
+{
+    <span style="color: #008000; font-weight: bold">public</span> <span style="color: #0000FF">BadRequestObjectResult</span>([ActionResultObjectValue] ModelStateDictionary modelState)
+        : <span style="color: #008000; font-weight: bold">base</span>(<span style="color: #008000; font-weight: bold">new</span> SerializableError(modelState))
+        =&gt; StatusCode = StatusCodes.Status400BadRequest;
+}</pre>
+            </div>
+            <p>
+                Ainsi, la réponse automatique en cas d'erreur de validation en ASP.NET Core 2.1 est :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">
+<span style="color: #7D9029">[ApiController]</span>
+<span style="color: #7D9029">[Route(&quot;products&quot;)]</span>
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
+{
+<span style="color: #7D9029">    [HttpGet(&quot;{id}&quot;)]</span>
+    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">Get</span>(<span style="color: #B00040">int</span> id, [Required]<span style="color: #B00040">string</span> label)
+    {
+        <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>(<span style="color: #008000; font-weight: bold">new</span> { Id = id, Label = label });
+    }
+}
+
+&gt; curl http://localhost:5000/products/jojo
+{
+    <span style="color: #008000; font-weight: bold">&quot;id&quot;</span>: [<span style="color: #BA2121">&quot;The value &#39;jojo&#39; is not valid.&quot;</span>],
+    <span style="color: #008000; font-weight: bold">&quot;label&quot;</span>: [<span style="color: #BA2121">&quot;The label field is required.&quot;</span>]
+}</pre>
+            </div>
+            <p>
+                Ce qui revient à :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #7D9029">[Route(&quot;products&quot;)]</span>
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
+{
+<span style="color: #7D9029">    [HttpGet(&quot;{id}&quot;)]</span>
+    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">Get</span>(<span style="color: #B00040">int</span> id, [Required] <span style="color: #B00040">string</span> label)
+    {
+        <span style="color: #008000; font-weight: bold">if</span>(!ModelState.IsValid)
+        {
+            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">BadRequest</span>(ModelState);
+        }
+        <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>(<span style="color: #008000; font-weight: bold">new</span> { Id = id, Label = label });
+    }
+}
+
+&gt; curl http://localhost:5000/products/jojo
+{
+    <span style="color: #008000; font-weight: bold">&quot;id&quot;</span>: [<span style="color: #BA2121">&quot;The value &#39;jojo&#39; is not valid.&quot;</span>],
+    <span style="color: #008000; font-weight: bold">&quot;label&quot;</span>: [<span style="color: #BA2121">&quot;The label field is required.&quot;</span>]
+}</pre>
+            </div>
+            <h3>ASP.NET Core 2.2 et supérieur</h3>
+            <p>
+                À partir d'ASP.NET Core 2.2, la réponse automatique en cas d'erreur de validation devient <strong>ValidationProblemDetails</strong>, comme l'indique <a href="https://docs.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-2.1#automatic-http-400-responses">la documentation</a> :
+            </p>
+            <blockquote class="quote">
+                <p>
+                    With a compatibility version of 2.2 or later, the default response type for an HTTP 400 response is <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails?view=aspnetcore-6.0">ValidationProblemDetails</a>.
+                </p>
+                <hr>
+                <p>
+                    Avec la compatibilité en version 2.2, le type de réponse automatique pour les erreurs HTTP 400 est ValidationProblemDetails.
+                </p>
+            </blockquote>
+            <p>
+                <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails">ValidationProblemDetails</a> permet de formater les erreurs de validations pour générer une réponses HTTP d'API respectant <a href="https://tools.ietf.org/html/rfc7807">RFC7807</a> (Problem Details for HTTP APIs). Comme <strong>SerializableError</strong>, cette classe permet de <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ValidationProblemDetails.cs#L30">convertir ModelStateDictionary en Dictionary&lt;string, string[]&gt;</a>.
+            </p>
+            <p>
+                D'ailleurs la méthode <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ControllerBase.cs#L1970">ControllerBase.ValidationProblem</a> créait un <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ControllerBase.cs#L1984">ValidationProblemDetails</a> créé à partir du <strong>ModelStateDictionary</strong>, pour le retourner encapsulé dans un <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ControllerBase.cs#L2008">BadRequestObjectResult</a>.
+            </p>
+            <p>
+                Ainsi, la réponse automatique en cas d'erreur de validation en ASP.NET Core 6 est :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #7D9029">[ApiController]</span>
+<span style="color: #7D9029">[Route(&quot;products&quot;)]</span>
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
+{
+<span style="color: #7D9029">    [HttpGet(&quot;{id}&quot;)]</span>
+    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">Get</span>(<span style="color: #B00040">int</span> id, [Required]<span style="color: #B00040">string</span> label)
+    {
+        <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>(<span style="color: #008000; font-weight: bold">new</span> { Id = id, Label = label });
+    }
+}
+
+&gt; curl http://localhost:5000/products/jojo
+{
+    <span style="color: #008000; font-weight: bold">&quot;type&quot;</span>: <span style="color: #BA2121">&quot;https://tools.ietf.org/html/rfc7231#section-6.5.1&quot;</span>,
+    <span style="color: #008000; font-weight: bold">&quot;title&quot;</span>: <span style="color: #BA2121">&quot;One or more validation errors occurred.&quot;</span>,
+    <span style="color: #008000; font-weight: bold">&quot;status&quot;</span>: <span style="color: #666666">400</span>,
+    <span style="color: #008000; font-weight: bold">&quot;traceId&quot;</span>: <span style="color: #BA2121">&quot;00-de58e6808a46b7c7483b722009fb5280-416e827d8200cfeb-00&quot;</span>,
+    <span style="color: #008000; font-weight: bold">&quot;errors&quot;</span>: {
+        <span style="color: #008000; font-weight: bold">&quot;id&quot;</span>: [<span style="color: #BA2121">&quot;The value &#39;jojo&#39; is not valid.&quot;</span>],
+        <span style="color: #008000; font-weight: bold">&quot;label&quot;</span>: [<span style="color: #BA2121">&quot;The label field is required.&quot;</span>]
+    }
+}</pre>
+            </div>
+            <p>
+                Ce qui revient à :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #7D9029">[Route(&quot;products&quot;)]</span>
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
+{
+<span style="color: #7D9029">    [HttpGet(&quot;{id}&quot;)]</span>
+    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">Get</span>(<span style="color: #B00040">int</span> id, [Required] <span style="color: #B00040">string</span> label)
+    {
+        <span style="color: #008000; font-weight: bold">if</span>(!ModelState.IsValid)
+        {
+            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">ValidationProblem</span>();
+        }
+        <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>(<span style="color: #008000; font-weight: bold">new</span> { Id = id, Label = label });
+    }
+}
+
+&gt; curl http://localhost:5000/products/jojo
+{
+    <span style="color: #008000; font-weight: bold">&quot;type&quot;</span>: <span style="color: #BA2121">&quot;https://tools.ietf.org/html/rfc7231#section-6.5.1&quot;</span>,
+    <span style="color: #008000; font-weight: bold">&quot;title&quot;</span>: <span style="color: #BA2121">&quot;One or more validation errors occurred.&quot;</span>,
+    <span style="color: #008000; font-weight: bold">&quot;status&quot;</span>: <span style="color: #666666">400</span>,
+    <span style="color: #008000; font-weight: bold">&quot;traceId&quot;</span>: <span style="color: #BA2121">&quot;00-87e5c74096ac6aa0be307b75d6bdb97a-69b10b85db25e571-00&quot;</span>,
+    <span style="color: #008000; font-weight: bold">&quot;errors&quot;</span>: {
+        <span style="color: #008000; font-weight: bold">&quot;id&quot;</span>: [<span style="color: #BA2121">&quot;The value &#39;jojo&#39; is not valid.&quot;</span>],
+        <span style="color: #008000; font-weight: bold">&quot;label&quot;</span>: [<span style="color: #BA2121">&quot;The label field is required.&quot;</span>]
+    }
+}</pre>
+            </div>
+            <blockquote class="quote">
+                To make automatic and custom responses consistent, call the <strong>ValidationProblem</strong> method instead of <strong>BadRequest</strong>. <strong>ValidationProblem</strong> returns a <strong>ValidationProblemDetails</strong> object as well as the automatic response.
+                <hr>
+                Pour que les réponses automatiques et manuelles soient consistantes, il faut utiliser la méthode <strong>ValidationProblem</strong> au lieu de <strong>BadRequest</strong>. <strong>ValidationProblem</strong> retourne une instance du type <strong>ValidationProblemDetails</strong> tout comme la réponse automatique.
+            </blockquote>
+            <h3>ModelStateInvalidFilter</h3>
+            <p>
+                <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.infrastructure.modelstateinvalidfilter">ModelStateInvalidFilter</a> est un <a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/filters">filtre d'action</a> qui est ajouté à toutes les actions marquées par <strong>ApiControllerAttribute</strong>. <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.0/src/Mvc/Mvc.Core/src/Infrastructure/ModelStateInvalidFilter.cs#L80">Si le modèle est invalide, il retourne immédiatement une réponse générée par <strong>ApiBehaviorOptions.InvalidModelStateResponseFactory</strong></a> :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ModelStateInvalidFilter</span> : IActionFilter
+{
+    <span style="color: #008000; font-weight: bold">private</span> <span style="color: #008000; font-weight: bold">readonly</span> ApiBehaviorOptions _apiBehaviorOptions;
+
+    <span style="color: #008000; font-weight: bold">public</span> <span style="color: #0000FF">ModelStateInvalidFilter</span>(ApiBehaviorOptions apiBehaviorOptions)
+    {
+        _apiBehaviorOptions = apiBehaviorOptions;
+    }
+
+    <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">void</span> <span style="color: #0000FF">OnActionExecuting</span>(ActionExecutingContext context)
+    {
+        <span style="color: #008000; font-weight: bold">if</span> (context.Result == <span style="color: #008000; font-weight: bold">null</span> &amp;&amp; !context.ModelState.IsValid)
+        {
+            context.Result = _apiBehaviorOptions.InvalidModelStateResponseFactory(context);
+        }
+    }
+}</pre>
+            </div>
+            <p>
+                La réponse est générée par l'option <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.apibehavioroptions.invalidmodelstateresponsefactory">ApiBehaviorOptions.InvalidModelStateResponseFactory</a> du service MVC <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.apibehavioroptions">ApiBehaviorOptions</a>.
+            </p>
+            <h3>ApiBehaviorOptions.InvalidModelStateResponseFactory</h3>
+            <p>
+                <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.apibehavioroptions">ApiBehaviorOptions</a> est un service utilisées pour configurer le comportement des types annotés avec <strong>ApiControllerAttribute</strong>. Sa propriété <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.apibehavioroptions.invalidmodelstateresponsefactory">InvalidModelStateResponseFactory</a> est un délégué référant la convertion du <strong>ModelStateDictionary</strong> invalide en <strong>IActionResult</strong>.
+            </p>
+            <p>
+                En ASP.NET Core 2.1, cette propriété est initialisée avec <a href="https://github.com/dotnet/aspnetcore/blob/v2.1.31/src/Mvc/Mvc.Core/src/Internal/ApiBehaviorOptionsSetup.cs#L23">une méthode qui transforme <strong>ModelStateDictionary</strong> en <strong>SerializableError</strong></a> :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ApiBehaviorOptionsSetup</span> : IConfigureOptions&lt;ApiBehaviorOptions&gt;
+{
+    <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">void</span> <span style="color: #0000FF">Configure</span>(ApiBehaviorOptions options)
+    {
+         options.InvalidModelStateResponseFactory = GetInvalidModelStateResponse;
+
+        IActionResult <span style="color: #0000FF">GetInvalidModelStateResponse</span>(ActionContext context)
+        {
+            <span style="color: #B00040">var</span> result = <span style="color: #008000; font-weight: bold">new</span> BadRequestObjectResult(context.ModelState);
+
+            result.ContentTypes.Add(<span style="color: #BA2121">&quot;application/json&quot;</span>);
+            result.ContentTypes.Add(<span style="color: #BA2121">&quot;application/xml&quot;</span>);
+
+            <span style="color: #008000; font-weight: bold">return</span> result;
+        }
+    }
+}</pre>
+            </div>
+            <p>
+                Alors qu'en ASP.NET Core 6, cette propriétée est initialisée avec <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.0/src/Mvc/Mvc.Core/src/DependencyInjection/ApiBehaviorOptionsSetup.cs#L23">une lambda qui transforme <strong>ModelStateDictionary</strong> en <strong>ValidationProblemDetails</strong></a> :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">internal</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ApiBehaviorOptionsSetup</span> : IConfigureOptions&lt;ApiBehaviorOptions&gt;
+{
+    <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">void</span> <span style="color: #0000FF">Configure</span>(ApiBehaviorOptions options)
+    {
+        options.InvalidModelStateResponseFactory = context =&gt;
+        {
+            <span style="color: #B00040">var</span> problemDetails = <span style="color: #008000; font-weight: bold">new</span> ValidationProblemDetails(context.ModelState);
+            problemDetails.Status = <span style="color: #666666">400</span>;
+
+            <span style="color: #B00040">var</span> result = <span style="color: #008000; font-weight: bold">new</span> ObjectResult(problemDetails);
+            result.StatusCode = problemDetails.Status
+            result.ContentTypes.Add(<span style="color: #BA2121">&quot;application/problem+json&quot;</span>);
+            result.ContentTypes.Add(<span style="color: #BA2121">&quot;application/problem+xml&quot;</span>);
+            
+            <span style="color: #008000; font-weight: bold">return</span> result;
+        };
+    }
+}</pre>
+            </div>
+            <p>
+                De plus, il est possible de surcharger cette propriété pour personaliser la réponse générée en cas d'erreur de validation. Par exemple en ASP.NET Core 6, pour reproduire le comportement d'ASP.NET Core 2.1 :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =&gt;
+        {
+            options.InvalidModelStateResponseFactory = context =&gt;
+            {
+                <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000; font-weight: bold">new</span> <span style="color: #0000FF">BadRequestObjectResult</span>(context.ModelState);
+            };
+        }
+    );</pre>
+            </div>
+            <h3>Consistance</h3>
+            <h3>Rétrocompatibilité</h3>
+            <p>
+                Pour cette raison en autre, le monté de version d'ASP.NET Core 2.1 à ASP.NET Core 6 n'est rétrocompatible. Si l'API respecte <a href="https://semver.org/">Semantic Versioning 2.0.0</a>, le plus fiable serait d'accompagner cette transition d'une version majeur de l'API. Mais cela n'est pas toujours envisageable.
+            </p>
+            <blockquote class="end-quote">
+                <p>
+                    <strong>
+                        Le remède à l'ennui, c'est la curiosité.
+                        <br>
+                        La curiosité elle, est sans remède.
+                    </strong>
+                </p>
+                <footer>- NONYME Anne</footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>
