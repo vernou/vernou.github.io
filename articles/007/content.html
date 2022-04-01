@@ -209,7 +209,7 @@
     <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">struct</span> <span style="color: #0000FF; font-weight: bold">InvalidCode</span> { }
     <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">struct</span> <span style="color: #0000FF; font-weight: bold">CodeAlreadyUsed</span> { }
     <span style="color: #008000; font-weight: bold">public</span> OneOf&lt;Success, InvalidCode, CodeAlreadyUsed&gt;
-            CreateProduct2(<span style="color: #B00040">string</span> code, <span style="color: #B00040">string</span> label)
+            CreateProduct(<span style="color: #B00040">string</span> code, <span style="color: #B00040">string</span> label)
     {
         <span style="color: #008000; font-weight: bold">if</span> (!CheckCodeIsValid(code))
             <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000; font-weight: bold">new</span> <span style="color: #0000FF">InvalidCode</span>();
