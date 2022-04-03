@@ -17,14 +17,14 @@
     </header>
     <article class="centered">
         <div class="wrapper">
-            <span class="post-date">20 février 2022</span>
+            <span class="post-date">03 avril 2022</span>
             <h2>
                 ASP.NET Core:
                 <br>
                 Retour automatique en cas d'erreur de validation
             </h2>
             <p>
-                Dans le cadre de mon travail, je prépare la migration de nos applications de .NET Framework vers .NET Core. Lors de mes tests, j'ai eu l'agréable surprise (c'est une antiphrase) de constater que dans les nouvelles versions d'ASP.NET Core, qu'en cas d'erreur de validation du modèle, le format de la réponse automatique avait changé. C'est pourquoi, je me suis plongé dans ce sujet.
+                Dans le cadre de mon travail, je prépare la migration de nos applications en .NET Framework vers .NET Core. De ce fait, mon analyse couvre aussi les différences entre ASP.NET Core 2.1 (dernière version supportée en .NET Framework) et ASP.NET Core 6 (version à date). Il se trouve que l'une des différences concerne le format de réponse automatique en cas d'erreur de validation. Donc, je me suis plongé dans ce sujet.
             </p>
             <figure class="articleimg">
                 <img src="cover.jpg" alt="Cresonnière">
@@ -44,17 +44,17 @@
                 </p>
             </blockquote>
             <p>
-                Autrement dit, si un client émet une requête HTTP et que le serveur lui renvoie une réponse avec le code 400 (Bad Request), cela signifie que la requête est incorrecte. Le serveur peut intégrer dans la réponse des informations complémentaires qui peuvent permettre au client de corriger la requête pour ensuite la réémettre.
+                Autrement dit, si un client émet une requête HTTP et que le serveur lui renvoie une réponse avec le code 400 (Bad Request), cela signifie que la requête du client est incorrecte. Le serveur peut intégrer dans sa réponse des informations complémentaires qui peuvent permettre au client de corriger la requête pour ensuite la ré-émettre.
             </p>
             <p>
-                Ainsi, une application qui gère ce type de réponse, peut indiquer à l'utilisateur les champs ayant une valeur saisie incorrecte avec la raison du refus. Ainsi, l'utilisateur est en mesure de corriger les valeurs saisies incorrectes et de réexécuter l'opération.
+                Ainsi, une application qui gère ce type de réponse, peut indiquer à l'utilisateur les champs ayant une valeur saisie incorrecte avec la raison du refus. Alors, l'utilisateur est en mesure de corriger sa saisie et de ré-exécuter l'opération.
             </p>
             <p>
-                Pour cela, il faut que l'application et le serveur soit en accord sur la forme du message. Si le serveur renvoie une réponse qui n'est pas interprétable par l'application, alors cette dernière ne pourra qu'afficherun message d'erreur générique... ce qui est frustrant pour l'utilisateur.
+                Pour cela, il faut que l'application et le serveur soit en accord sur la forme du message. Si le serveur renvoie une réponse qui n'est pas interprétable par l'application, alors cette dernière ne pourra qu'afficher un message d'erreur générique... ce qui est frustrant pour l'utilisateur.
             </p>
             <h3>Retour automatique en cas d'erreur de validation</h3>
             <p>
-                En ASP.NET Core, la validation du modèle est automatique. Par contre, il faut vérifier le résultat de cette validation et retourner la réponse adéquate. Dans la grande majorité des cas, il s'agit de retourner le <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.controllerbase.modelstate">ControllerBase.ModelState</a> qui comporte les erreurs de validation :
+                En ASP.NET Core, <a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/models/validation">la validation du modèle est automatique</a>. Par contre, il reste à la charge du développeur de vérifier le résultat de cette validation et retourner la réponse adéquate. Dans la grande majorité des cas, il s'agit de retourner le <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.controllerbase.modelstate">ControllerBase.ModelState</a> qui comporte les erreurs de validation :
             </p>
             <!-- HTML generated using hilite.me -->
             <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
@@ -73,7 +73,7 @@
 }</pre>
             </div>
             <p>
-                Par conséquent, la majorité des actions commencent par ce même bloc d'instruction :
+                Par conséquent, la majorité des actions commencent par ce redondant bloc d'instruction :
             </p>
             <!-- HTML generated using hilite.me -->
             <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
@@ -99,7 +99,7 @@
 }</pre>
             </div>
             <p>
-                Seulement, comme introduit en préambule, le format de la réponse automatique suite à une erreure de validation varit en fonction de la version d'ASP.NET Core.
+                Seulement, comme introduit en préambule, le format de la réponse automatique en cas d'erreur de validation varie en fonction de la version d'ASP.NET Core.
             </p>
             <h3>ASP.NET Core 2.1</h3>
             <p>
@@ -194,10 +194,10 @@
                 </p>
             </blockquote>
             <p>
-                <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails">ValidationProblemDetails</a> permet de formater les erreurs de validations pour générer une réponses HTTP d'API respectant <a href="https://tools.ietf.org/html/rfc7807">RFC7807</a> (Problem Details for HTTP APIs). Comme <strong>SerializableError</strong>, cette classe permet de <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ValidationProblemDetails.cs#L30">convertir ModelStateDictionary en Dictionary&lt;string, string[]&gt;</a>.
+                <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.validationproblemdetails">ValidationProblemDetails</a> permet de formater les erreurs de validation pour générer une réponse respectant <a href="https://tools.ietf.org/html/rfc7807">RFC7807</a> (Problem Details for HTTP APIs). Comme <strong>SerializableError</strong>, cette classe permet de <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ValidationProblemDetails.cs#L30">convertir ModelStateDictionary en Dictionary&lt;string, string[]&gt;</a>.
             </p>
             <p>
-                D'ailleurs la méthode <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ControllerBase.cs#L1970">ControllerBase.ValidationProblem</a> créait un <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ControllerBase.cs#L1984">ValidationProblemDetails</a> créé à partir du <strong>ModelStateDictionary</strong>, pour le retourner encapsulé dans un <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ControllerBase.cs#L2008">BadRequestObjectResult</a>.
+                D'ailleurs la méthode <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ControllerBase.cs#L1970">ControllerBase.ValidationProblem</a> créait un <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ControllerBase.cs#L2008">BadRequestObjectResult</a> qui encapsule <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.3/src/Mvc/Mvc.Core/src/ControllerBase.cs#L1984">ValidationProblemDetails</a> créé à partir du <strong>ModelStateDictionary</strong>.
             </p>
             <p>
                 Ainsi, la réponse automatique en cas d'erreur de validation en ASP.NET Core 6 est :
@@ -258,11 +258,6 @@
     }
 }</pre>
             </div>
-            <blockquote class="quote">
-                To make automatic and custom responses consistent, call the <strong>ValidationProblem</strong> method instead of <strong>BadRequest</strong>. <strong>ValidationProblem</strong> returns a <strong>ValidationProblemDetails</strong> object as well as the automatic response.
-                <hr>
-                Pour que les réponses automatiques et manuelles soient consistantes, il faut utiliser la méthode <strong>ValidationProblem</strong> au lieu de <strong>BadRequest</strong>. <strong>ValidationProblem</strong> retourne une instance du type <strong>ValidationProblemDetails</strong> tout comme la réponse automatique.
-            </blockquote>
             <h3>ModelStateInvalidFilter</h3>
             <p>
                 <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.infrastructure.modelstateinvalidfilter">ModelStateInvalidFilter</a> est un <a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/controllers/filters">filtre d'action</a> qui est ajouté à toutes les actions marquées par <strong>ApiControllerAttribute</strong>. <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.0/src/Mvc/Mvc.Core/src/Infrastructure/ModelStateInvalidFilter.cs#L80">Si le modèle est invalide, il retourne immédiatement une réponse générée par <strong>ApiBehaviorOptions.InvalidModelStateResponseFactory</strong></a> :
@@ -292,7 +287,7 @@
             </p>
             <h3>ApiBehaviorOptions.InvalidModelStateResponseFactory</h3>
             <p>
-                <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.apibehavioroptions">ApiBehaviorOptions</a> est un service utilisées pour configurer le comportement des types annotés avec <strong>ApiControllerAttribute</strong>. Sa propriété <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.apibehavioroptions.invalidmodelstateresponsefactory">InvalidModelStateResponseFactory</a> est un délégué référant la convertion du <strong>ModelStateDictionary</strong> invalide en <strong>IActionResult</strong>.
+                <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.apibehavioroptions">ApiBehaviorOptions</a> est un service utilisé pour configurer le comportement des types annotés avec <strong>ApiControllerAttribute</strong>. Sa propriété <a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.apibehavioroptions.invalidmodelstateresponsefactory">InvalidModelStateResponseFactory</a> est un délégué référant une conversion du <strong>ModelStateDictionary</strong> invalide en <strong>IActionResult</strong>.
             </p>
             <p>
                 En ASP.NET Core 2.1, cette propriété est initialisée avec <a href="https://github.com/dotnet/aspnetcore/blob/v2.1.31/src/Mvc/Mvc.Core/src/Internal/ApiBehaviorOptionsSetup.cs#L23">une méthode qui transforme <strong>ModelStateDictionary</strong> en <strong>SerializableError</strong></a> :
@@ -318,7 +313,7 @@
 }</pre>
             </div>
             <p>
-                Alors qu'en ASP.NET Core 6, cette propriétée est initialisée avec <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.0/src/Mvc/Mvc.Core/src/DependencyInjection/ApiBehaviorOptionsSetup.cs#L23">une lambda qui transforme <strong>ModelStateDictionary</strong> en <strong>ValidationProblemDetails</strong></a> :
+                Alors qu'en ASP.NET Core 6, cette propriété est initialisée avec <a href="https://github.com/dotnet/aspnetcore/blob/v6.0.0/src/Mvc/Mvc.Core/src/DependencyInjection/ApiBehaviorOptionsSetup.cs#L23">une lambda qui transforme <strong>ModelStateDictionary</strong> en <strong>ValidationProblemDetails</strong></a> :
             </p>
             <!-- HTML generated using hilite.me -->
             <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
@@ -342,7 +337,7 @@
 }</pre>
             </div>
             <p>
-                De plus, il est possible de surcharger cette propriété pour personaliser la réponse générée en cas d'erreur de validation. Par exemple en ASP.NET Core 6, pour reproduire le comportement d'ASP.NET Core 2.1 :
+                Aussi, il est possible de surcharger cette propriété pour personnaliser la réponse générée en cas d'erreur de validation. Par exemple en ASP.NET Core 6, pour reproduire le comportement d'ASP.NET Core 2.1 :
             </p>
             <!-- HTML generated using hilite.me -->
             <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
@@ -356,20 +351,76 @@
         }
     );</pre>
             </div>
-            <h3>Consistance</h3>
-            <h3>Rétrocompatibilité</h3>
+            <h3>Réponse manuelle/automatique homogène</h3>
             <p>
-                Pour cette raison en autre, le monté de version d'ASP.NET Core 2.1 à ASP.NET Core 6 n'est rétrocompatible. Si l'API respecte <a href="https://semver.org/">Semantic Versioning 2.0.0</a>, le plus fiable serait d'accompagner cette transition d'une version majeur de l'API. Mais cela n'est pas toujours envisageable.
+                Il y arrive que certaines réponses en cas d'erreur de validation doivent être manuelles. Dans ce cas, il faut que la réponse manuelle soit conforme à la réponse automatique.
             </p>
+            <p>
+                Pour cela, il faut utiliser en <strong>ASP.NET Core 2.1</strong>  la méthode <strong>ControllerBase.BadRequest</strong> et en <strong>ASP.NET Core 2.2</strong> (et versions suivantes) la méthode <strong>ControllerBase.ValidationProblem</strong> :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #7D9029">[ApiController]</span>
+<span style="color: #7D9029">[Route(&quot;products&quot;)]</span>
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
+{
+<span style="color: #7D9029">    [HttpGet(&quot;{id}&quot;)]</span>
+    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">Get</span>(<span style="color: #B00040">int</span> id, [Required] <span style="color: #B00040">string</span> label)
+    {
+        <span style="color: #008000; font-weight: bold">if</span> (label == <span style="color: #BA2121">&quot;JoJo&quot;</span>)
+            ModelState.AddModelError(nameof(label), <span style="color: #BA2121">&quot;It must not have the value `JoJo`.&quot;</span>);
+
+        <span style="color: #008000; font-weight: bold">if</span> (!ModelState.IsValid)
+        {
+<span style="color: #BC7A00">#if NETCOREAPP2_2_OR_GREATER</span>
+            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">ValidationProblem</span>();
+<span style="color: #BC7A00">#else</span>
+            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">BadRequest</span>(ModelState);
+<span style="color: #BC7A00">#endif</span>
+        }
+        <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>(<span style="color: #008000; font-weight: bold">new</span> { Id = id, Name = label });
+    }
+}</pre>
+            </div>
+            <p>
+                Une autre possibilité est de générer la réponse manuelle comme est générée la réponse automatique, avec <strong>ApiBehaviorOptions.InvalidModelStateResponseFactory</strong> :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #7D9029">[ApiController]</span>
+<span style="color: #7D9029">[Route(&quot;products&quot;)]</span>
+<span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
+{
+
+<span style="color: #7D9029">    [HttpGet(&quot;{id}&quot;)]</span>
+    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">Get</span>(
+<span style="color: #7D9029">        [FromServices]</span> IOptions&lt;ApiBehaviorOptions&gt; apiBehaviorOptions,
+        <span style="color: #B00040">int</span> id,
+<span style="color: #7D9029">        [Required]</span> <span style="color: #B00040">string</span> label)
+    {
+        <span style="color: #008000; font-weight: bold">if</span> (label == <span style="color: #BA2121">&quot;JoJo&quot;</span>)
+        {
+            ModelState.AddModelError(<span style="color: #BA2121">&quot;label&quot;</span>, <span style="color: #BA2121">&quot;It must not have the value `JoJo`.&quot;</span>);
+        }
+
+        <span style="color: #008000; font-weight: bold">if</span> (!ModelState.IsValid)
+        {
+            <span style="color: #008000; font-weight: bold">return</span> apiBehaviorOptions.Value.InvalidModelStateResponseFactory(ControllerContext);
+        }
+        <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>(<span style="color: #008000; font-weight: bold">new</span> { Id = id, Name = label });
+    }
+}</pre>
+            </div>
+            <hr>
             <blockquote class="end-quote">
                 <p>
                     <strong>
-                        Le remède à l'ennui, c'est la curiosité.
+                        Je ne cherche pas à connaître les réponses,
                         <br>
-                        La curiosité elle, est sans remède.
+                        je cherche à comprendre les questions.
                     </strong>
                 </p>
-                <footer>- NONYME Anne</footer>
+                <footer>- Confucius</footer>
             </blockquote>
         </div>
     </article>
