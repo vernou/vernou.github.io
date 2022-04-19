@@ -172,38 +172,36 @@ Content :</pre>
                 ce qui entraine de la confusion.
                 Si vous en doutez, voici une liste non exhaustive de ticket ouvert à l'équipe ASP.NET Core de Microsoft à ce sujet :
             </p>
-            <p>
-                <ul>
-                    <li>
-                        <a href="https://github.com/aspnet/Mvc/issues/8631">
-                            [BindRequired] validation attribute does not work in case of [FromBody] model binder
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/aspnet/Mvc/issues/7271">
-                            ModelState.IsValid on built-in type which has BindRequired, validate successfully when value hasn't been provided in the Json body
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/RicoSuter/NSwag/issues/2710">
-                            BindRequired vs. Required
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/aspnet/Mvc/issues/7528">
-                            ApiController: Problems with Parameter Validation
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://github.com/aspnet/Mvc/issues/7815">
-                            Validation of required non-nullable model properties
-                        </a>
-                    </li>
-                    <li>
-                        ...
-                    </li>
-                </ul>
-            </p>
+            <ul>
+                <li>
+                    <a href="https://github.com/aspnet/Mvc/issues/8631">
+                        [BindRequired] validation attribute does not work in case of [FromBody] model binder
+                    </a>
+                </li>
+                <li>
+                    <a href="https://github.com/aspnet/Mvc/issues/7271">
+                        ModelState.IsValid on built-in type which has BindRequired, validate successfully when value hasn't been provided in the Json body
+                    </a>
+                </li>
+                <li>
+                    <a href="https://github.com/RicoSuter/NSwag/issues/2710">
+                        BindRequired vs. Required
+                    </a>
+                </li>
+                <li>
+                    <a href="https://github.com/aspnet/Mvc/issues/7528">
+                        ApiController: Problems with Parameter Validation
+                    </a>
+                </li>
+                <li>
+                    <a href="https://github.com/aspnet/Mvc/issues/7815">
+                        Validation of required non-nullable model properties
+                    </a>
+                </li>
+                <li>
+                    ...
+                </li>
+            </ul>
             <p>
                 Mais le problème majeur, c'est que le problème initial n'est pas résolu.
                 Il reste des cas où la vérification n'est pas effective.

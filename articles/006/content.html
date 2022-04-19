@@ -205,13 +205,13 @@
             </blockquote>
             <p>
                 Cela va générer les fichiers suivants :
-                <ul>
-                    <li><strong>RELEASES</strong> : Un fichier texte référençant les versions disponibles de l'application.</li>
-                    <li><strong>Setup.exe</strong> : Un exécutable permettant d'installer l'application pour un utilisateur.</li>
-                    <li><strong>Setup.msi</strong> : Un installeur pour déployer l'application à tous les utilisateurs.</li>
-                    <li><strong>SquiDemoId-1.0.0-full.nupkg</strong> : L'application empaqueté au format NuGet.</li>
-                </ul>
             </p>
+            <ul>
+                <li><strong>RELEASES</strong> : Un fichier texte référençant les versions disponibles de l'application.</li>
+                <li><strong>Setup.exe</strong> : Un exécutable permettant d'installer l'application pour un utilisateur.</li>
+                <li><strong>Setup.msi</strong> : Un installeur pour déployer l'application à tous les utilisateurs.</li>
+                <li><strong>SquiDemoId-1.0.0-full.nupkg</strong> : L'application empaqueté au format NuGet.</li>
+            </ul>
             <h3>3) Déployer l'application (optionnel)</h3>
             <p>
                 Le fichier <strong>Setup.msi</strong> permet de déployer l'application à l'ensemble des utilisateurs du poste.
@@ -251,6 +251,7 @@
             <h3>4) Installer l'application</h3>
             <p>
                 Le fichier <strong>Setup.exe</strong> permet d'installer l'application. L'installation va :
+            </p>
                 <ul>
                     <li>
                         Créer le dossier "%LocalAppData%\[NuGet Id]" et y ajoute :
@@ -272,7 +273,6 @@
                         Enregistre l'application dans le registre Windows avec la procédure de désinstallation
                     </li>
                 </ul>
-            </p>
             <p>
                 L'application est installée et peut-être démarrer à partir du raccourcis présent sur le bureau.
             </p>
