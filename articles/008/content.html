@@ -19,10 +19,12 @@
         <div class="wrapper">
             <span class="post-date">03 mars 2022</span>
             <h2>
-                La politique de support pour ASP.NET Core 2.1
+                ASP.NET Core
+                <br>
+                La politique de support pour .NET Framework
             </h2>
             <p>
-                Selon la politique de support de Microsoft, ASP.NET Core 2.1 est toujours supporté. Mais un matin, je constate avec horripilation dans la documentation d'ASP.NET Core, les sections concernant ASP.NET Core 2.1 ont disparu. Comme la documentation est une part du produit, qu'en est-il réellement du support de ce dernier?
+                Selon la politique de support de Microsoft, ASP.NET Core 2.1 est toujours supporté. Mais un matin, je constate avec horripilation que dans la documentation d'ASP.NET Core, les sections concernant ASP.NET Core 2.1 ont disparu. Comme la documentation est une part du produit, qu'en est-il réellement du support de ce dernier?
             </p>
             <figure class="articleimg">
                 <img src="cover.jpg" alt="Échelle brisée">
@@ -38,19 +40,45 @@
                 La dernière version compatible avec .NET Framework est ASP.NET Core 2.2, seulement son support a pris fin le 23 décembre 2019. Quant à ASP.NET Core 2.1, son support a pris fin le samedi 21 août 2021 pour .NET Core. <a href="https://dotnet.microsoft.com/platform/support/policy/aspnet">Par contre, il est maintenu pour .NET Framework.</a>
              </p>
              <blockquote class="quote">
-                 To help facilitate migrating applications to ASP.NET Core on .NET Core, the following ASP.NET Core 2.1 (latest patched version only) <a href="https://dotnet.microsoft.com/en-us/platform/support/policy/aspnetcore-2.1">packages</a> will be supported on the .NET Framework and follow the <a href="https://support.microsoft.com/en-us/lifecycle/search?alpha=.net%20framework">support cycle</a><a> for those .NET Framework versions. ASP.NET Core 2.1 is defined as "Tools" in the Microsoft Support Lifecycle Policy. A "Tool" requires a minimum of 12 months notification prior to the end of support. For more information, please see </a><a href="https://docs.microsoft.com/troubleshoot/aspnet/support-lifecycle-web-stack?WT.mc_id=dotnet-35129-website" >this KB Article</a>.
+                 To help facilitate migrating applications to ASP.NET Core on .NET Core, the following ASP.NET Core 2.1 (latest patched version only) <a href="https://dotnet.microsoft.com/en-us/platform/support/policy/aspnetcore-2.1">packages</a> will be supported on the .NET Framework and follow the <a href="https://support.microsoft.com/en-us/lifecycle/search?alpha=.net%20framework">support cycle</a> for those .NET Framework versions. ASP.NET Core 2.1 is defined as "Tools" in the Microsoft Support Lifecycle Policy. A "Tool" requires a minimum of 12 months notification prior to the end of support. For more information, please see <a href="https://docs.microsoft.com/troubleshoot/aspnet/support-lifecycle-web-stack?WT.mc_id=dotnet-35129-website" >this KB Article</a>.
                  <hr>
                  Pour faciliter la migration des applications vers ASP.NET Core sur .NET Core, <a href="https://dotnet.microsoft.com/en-us/platform/support/policy/aspnetcore-2.1">ASP.NET Core 2.1</a> (dernière version uniquement) sera pris en charge sur le .NET Framework et suivra <a href="https://support.microsoft.com/en-us/lifecycle/search?alpha=.net%20framework">le cycle de support</a> des versions de .NET Framework. ASP.NET Core 2.1 est défini comme « Outils » dans la politique de cycle de vie du support Microsoft. Un "Outil" nécessite un minimum de 12 mois de notification avant la fin du support. Pour plus d'informations, veuillez consulter <a href="https://docs.microsoft.com/troubleshoot/aspnet/support-lifecycle-web-stack?WT.mc_id=dotnet-35129-website" >cet article de la base de connaissances</a>.
             </blockquote>
             <p>
-                C'est pour ces raisons, que si vous êtes contraint d'utiliser .NET Framework, je recommande ASP.NET Core 2.1, pour profiter du support du produit.
+                C'est pour ces raisons, que si vous êtes contraint d'utiliser .NET Framework, il est recomandé d'utiliser ASP.NET Core 2.1, pour disposer du support du produit.
             </p>
+            <h3>Et pour Entity Framework Core?</h3>
+            <p>
+                EF Core 3.1 est la dernière version compatible avec .NET Framework. Seulement cette version n'a plus de support depuis le 13 décembre 2022.
+            </p>
+            <p>
+                Quand à EF Core 2.1, elle est suit la logique d'ASP.NET Core 2.1 :
+            </p>
+            <blockquote class="quote">
+                <p>
+                    EF Core 2.1 will continue to be supported when used with ASP.NET Core 2.1 on .NET Framework only.
+                </p>
+                <hr>
+                <p>
+                    EF Core 2.1 continuera d'être supporté quand utilisé avec ASP.NET Core 2.1 avec .NET Framework seulement.
+                </p>
+            </blockquote>
+            <h3>Qu'offre ce support?</h3>
+            <p>
+                J'ai eu une discussion avec un employé de Microsoft à propos de ce que permet ce support. <a href="https://github.com/dotnet/efcore/issues/29432#issuecomment-1292272224">La réponse</a> a été :
+            </p>
+            <blockquote class="quote">
+                <p>
+                    It would need to be an extremely serious bug such as a security issue to be accepted.
+                </p>
+                <hr>
+                <p>
+                    Il faudrait qu'il s'agisse d'un bug extrêmement grave, tel qu'un problème de sécurité, pour être accepté.
+                </p>
+            </blockquote>
             <h3>Le drame</h3>
             <p>
-                Après un travail acharné, je suis parvenu à évincer ces dépendances problématiques. Nous allons pouvoir migrer notre base de code vers ASP.NET Core 6. Mais avant cela, je dois réaliser une analyse de la migration.
-            </p>
-            <p>
-                Et à ce sujet, la documentation officielle d'ASP.NET Core regorge d'annotation, détaillant les différences de comportement d'une version à une autre. J'ai donc accompagné mon analyse de nombreuses références à cette documentation pour justifier certaines propositions.
+                Je suis en train de réaliser une analyse pour préparer la migration vers ASP.NET Core 6. La documentation officielle d'ASP.NET Core regorge d'annotation, détaillant les différences de comportement d'une version à une autre. J'ai donc accompagné mon analyse de nombreuses références à cette documentation pour justifier certaines propositions.
             </p>
             <p>
                 Mais en relisant le rapport produit, je constate que les liens Web ne renvoi plus vers les informations pertinentes. De plus, je ne parviens pas à retrouver ces informations dans la documentation. Il semble que tous les éléments à propos des versions 2.X d'ASP.NET Core ont disparu.
@@ -63,7 +91,7 @@
                 <a href="https://github.com/dotnet/AspNetCore.Docs/issues/24695">#24695 Drop 2.x content and sample apps</a>
             </p>
             <p>
-                Bien ASP.NET Core 2.X n'est plus supporté en .NET Core, ASP.NET Core 2.1 est toujours supporté en .NET Framework. Et j'insiste, la documentation est une part intégrante du produit. Donc, je trouve cette décision inconvenant. Alors, j'ai ouvert un ticket pour remonter le problème et demander le retour de la documentation ASP.NET Core 2.1 :
+                Bien ASP.NET Core 2.X n'est plus supporté en .NET Core, ASP.NET Core 2.1 est toujours supporté en .NET Framework. Et j'insiste, la documentation est une part intégrante du produit. Donc, je trouve cette décision inconvenante. Alors, j'ai ouvert un ticket pour remonter le problème et demander le retour de la documentation ASP.NET Core 2.1 :
             </p>
             <p>
                 <a href="https://github.com/dotnet/AspNetCore.Docs/issues/25171">#25171 Rollback the ASP.NET Core 2.X content</a>
