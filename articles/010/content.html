@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">08 juin 2023</span>
+            <h2>
+                Entity Framework Core :
+                <br>
+                .NET Framework / EF Core 3.1 / Sqlite / xunit
+            </h2>
+            <p>
+                Entity Framework Core permet d'exécuter des tests unitaires par l'intermédiaire de Sqlite. Cela fonctionne simplement en .NET Core, mais en .NET Framework, c'est une autre histoire.
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Portail abandonné en forét">
+                <figcaption>Portail abandonné en forét</figcaption>
+            </figure>
+            <blockquote class="quote">
+                <p>
+                    Avertissement : <a href="../008/content.html">Entity Framework Core 3.1 n'est plus supporté.</a>
+                </p>
+            </blockquote>
+            <h3>Problème</h3>
+            <p>
+                Lorsque l'on créait un projet créait un projet de test unitaire avec Entity Framework Core Sqlite en .NET Framework :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">dotnet new xunit --name Demo.Tests --framework netcoreapp3.1 --target-framework-override net48
+cd Demo.Tests
+dotnet add package Microsoft.EntityFrameworkCore.Sqlite --version 3.1.31
+dotnet restore --ignore-failed-sources
+dotnet test</pre>
+            </div>
+            <p>
+                Puisque l'on écrit un test utilisant Sqlite. Par exemple :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">using</span> <span style="color: #0e84b5; font-weight: bold">Microsoft.EntityFrameworkCore</span>;
+<span style="color: #008800; font-weight: bold">using</span> <span style="color: #0e84b5; font-weight: bold">Xunit</span>;
+
+<span style="color: #008800; font-weight: bold">namespace</span> <span style="color: #0e84b5; font-weight: bold">Demo.Tests</span>
+{
+    <span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">UnitTest1</span>
+    {
+<span style="color: #0000CC">        [Fact]</span>
+        <span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">Test1</span>()
+        {
+            <span style="color: #333399; font-weight: bold">var</span> context = <span style="color: #008800; font-weight: bold">new</span> DemoContext();
+            context.Database.EnsureCreated();
+        }
+    }
+
+    <span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">DemoContext</span> : DbContext
+    {
+        <span style="color: #008800; font-weight: bold">protected</span> <span style="color: #008800; font-weight: bold">override</span> <span style="color: #008800; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">OnConfiguring</span>(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlite(<span style="background-color: #fff0f0">&quot;Data Source=:memory:&quot;</span>);
+        }
+    }
+}</pre>
+            </div>
+            <p>
+                Lorsque le test est exécuté :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">> dotnet test
+...
+<span style="color: red;">[xUnit.net 00:00:02.62]     Demo.Tests.UnitTest1.Test1 [FAIL]
+  Failed</span> Demo.Tests.UnitTest1.Test1 [1 s]
+  <span style="color: red;">Error Message:
+   System.TypeInitializationException : The type initializer for 'Microsoft.Data.Sqlite.SqliteConnection' threw an exception.
+---- System.Reflection.TargetInvocationException : Exception has been thrown by the target of an invocation.
+-------- System.Exception : Library e_sqlite3 not found
+...
+Failed!  - Failed:     1, Passed:     0, Skipped:     0, Total:     1, Duration:</span>  - Demo.Tests.dll (net48)</pre>
+            </div>
+            <p>
+                L'erreur "<strong>Library e_sqlite3 not found</strong>" survient.
+            </p>
+            <h3>Analyse</h3>
+            <p>
+                Ce problème est référencé dans le ticket GitHub :
+                <br>
+                <a href="https://github.com/dotnet/efcore/issues/19396">[.Net Framework 4.8]Library e_sqlite3 not found</a>
+            </p>
+            <p>
+                En résumé, l'exécuteur de test <strong>xunit</strong> exécute les tests en <strong>Shadow Copy</strong> par défaut... seulement les composants nécessaires à Sqlite ne semblent pas correctement copiés.
+            </p>
+            <h4>Shadow Copy, quésaco?</h4>
+            <p>
+                En .NET, lorsqu'un assemblie est chargé, le fichier associé est verrouillé et il n'est pas possible de le modifier.
+            </p>
+            <p>
+                Le <a href="https://learn.microsoft.com/en-us/dotnet/framework/app-domains/shadow-copy-assemblies">Shadow Copy</a> indique à la runtime d'effectuer une copie des assemblies dans un dossier temporaire pour les charger depuis ce dossier. Ainsi le fichier originel n'est pas verrouillé.
+            </p>
+            <h3>Solution</h3>
+            <p>
+                Pour éviter ce problème, il suffit de désactiver le <strong>Shadow Copy</strong> à l'exécution des tests. Pour cela, il faut ajouter au côté du csproj le fichier "<strong>xunit.runner.json</strong>" avec le contenu suivant :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%">{
+  <span style="color: #007700">&quot;$schema&quot;</span>: <span style="background-color: #fff0f0">&quot;https://xunit.net/schema/current/xunit.runner.schema.json&quot;</span>,
+  <span style="color: #007700">&quot;shadowCopy&quot;</span>: <span style="color: #008800; font-weight: bold">false</span>
+}</pre>
+            </div>
+            <blockquote class="end-quote">
+                <p>
+                    <strong>
+                        One possible testing approach is to swap your production database with SQLite, effectively using it as a testing "fake".
+                    </strong>
+                </p>
+                <hr>
+                <p>
+                    <strong>
+                        Une approche possible pour tester consiste à substituer le système de gestion de base de données (SGBD) par SQLite, en l'utilisant comme une base de données factice.
+                    </strong>
+                </p>
+                <footer>- <a href="https://learn.microsoft.com/en-us/ef/core/testing/choosing-a-testing-strategy#sqlite-as-a-database-fake">Entity Framework Core documentation - SQLite as a database fake</a></footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>
