@@ -20,21 +20,26 @@
             <span class="post-date">20 février 2022</span>
             <h2>Gérer les cas particuliers avec OneOf</h2>
             <p>
-                En C#, j'ai longtemps été insatisfait par la manière de gérer les cas particuliers. Notament, quand il faut remonter l'information jusqu'à l'utilisateur. J'ai essayé différentes techniques, mais je ne trouvé aucune solution satisfaisante... Jusqu'au jour où j'ai découvert la librairie <strong>OneOf</strong>.
+                En C#, j'ai longtemps été frustré par la manière de gérer les cas particuliers. J'ai essayé différentes techniques, mais je n'ai trouvé aucune solution satisfaisante... Jusqu'au jour où j'ai découvert la librairie <strong>OneOf</strong>.
             </p>
             <figure class="articleimg">
-                <img src="cover.jpg" alt="???">
+                <img src="cover.jpg" alt="Petit ruisseau en montagne">
                 <figcaption>Petit ruisseau en montagne</figcaption>
             </figure>
-            <h3>Le problème</h3>
+            <h3>Un peu de contexte</h3>
             <p>
-                En tant que développeur, nous devons en permanence gérer des cas particuliers dans notre code. C'est-à-dire des cas anormal, mais fessant partie des règles métiers. Par exemple, si on demande à un utilisateur de saisir un nombre entier, il faut gérer le cas particulier où l'utilisateur a saisi autre chose qu'un nombre entier. Dans l'exemple précédent, gérer signifie qu'il faut contrôler la saisie et avertir l'utilisateur de son erreur pour qu'il puisse rectifier sa saisi.
+                En tant que développeur, nous devons en permanence gérer des cas particuliers dans notre code. C'est-à-dire des cas non-idéal, mais fessant partie des règles métiers.
             </p>
             <p>
-                Pour la démonstration, considérons l'exemple suivant, une méthode qui doit créer un produit. Elle a en paramètre le code et le libellé du produit a créé. Si le code est invalide ou si le code est déjà utilisé par un autre produit, alors le produit ne peut être créé. Comment indiquer que l'opération ne s'est pas correctement déroulée?
+                Par exemple, si un utilisateur doit saisir un nombre entier, il faut gérer le cas particulier où l'utilisateur a saisi autre chose qu'un nombre entier. Pour cela, il faut contrôler la saisie et avertir l'utilisateur de son erreur afin qu'il puisse rectifier.
             </p>
+            <h3>Exemple</h3>
             <p>
-                La méthode peut retourner un booléen pour indiquer si l'opération a réussi ou échoué :
+                Pour la suite de la démonstration, considérons l'exemple suivant, une méthode qui doit créer un produit. Elle a en paramètre le code et le libellé du produit a créé. Si le code est invalide ou si le code est déjà utilisé par un autre produit, alors le produit ne peut être créé. Comment indiquer que l'opération ne s'est pas correctement déroulée?
+            </p>
+            <h3>Retourner un booléen</h3>
+            <p>
+                La solution la plus simple est que la méthode retourne un booléen pour indiquer si l'opération a réussi ou échoué :
             </p>
             <!-- HTML generated using hilite.me -->
             <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
@@ -52,26 +57,20 @@
 }</pre>
             </div>
             <p>
-                Seulement en cas d'échec, la cause de l'erreur ne sera pas disponible. Donc, il ne sera pas possible d'indiquer à l'utilisateur comment corriger sa saisie. L'utilisateur verra uniquement un message générique indiquant que l'opération a échoué, ce qui frustrant :
+                Seulement en cas d'échec, la seule information renvoyée par la méthode est que le produit n'a pas été créé. Donc il sera uniquement possible d'indiquer à l'utilisateur :
             </p>
-<!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
-{
-    <span style="color: #7D9029">[HttpPost]</span>
-    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">CreateProduct</span>(
-        <span style="color: #7D9029">[FromServices]</span>ProductsService service,
-        <span style="color: #B00040">string</span> code,
-        <span style="color: #B00040">string</span> label)
-    {
-        <span style="color: #008000; font-weight: bold">if</span> (service.CreateProduct(code, label))
-            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>();
-        <span style="color: #008000; font-weight: bold">else</span>
-            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">BadRequest</span>();
-    }
-}</pre>
-            </div>
+            <blockquote class="quote">
+                Le produit n'a pas pu être créé, car une erreur est survenue. Veuillez vérifier les données puis réessayer. Si le problème persiste, veuillez contactez le support.
+            </blockquote>
+            <p>
+                Vous êtes certainement accoutumé à ce genre de message générique, donc il n'est pas nécessaire d'expliquer en quoi c'est frustrant.
+            </p>
             <h3>Avec les exceptions</h3>
             <p>
-                Exception est synonyme de particulier, donc il semble instinctif d'utiliser les exceptions pour gérer ces cas particuliers. Pour chaque erreur, il est possible de lever une exception spécifique :
+                La solution la plus instinctive est d'utiliser les exceptions pour gérer ces cas particuliers. Après tout, exception n'est-ce pas synonyme de particulier?
+            </p>
+            <p>
+                Donc pour chaque erreur, il est possible de lever une exception spécifique :
             </p>
             <!-- HTML generated using hilite.me -->
             <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
@@ -79,6 +78,7 @@
 {
     <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">InvalidCodeException</span> : Exception { }
     <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">CodeAlreadyUsedException</span> : Exception { }
+
     <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">void</span> <span style="color: #0000FF">CreateProduct</span>(<span style="color: #B00040">string</span> code, <span style="color: #B00040">string</span> label)
     {
         <span style="color: #008000; font-weight: bold">if</span> (!CheckCodeIsValid(code))
@@ -96,110 +96,93 @@
             </p>
             <!-- HTML generated using hilite.me -->
             <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
-                <pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
+                <pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">try</span>
 {
-    <span style="color: #7D9029">[HttpPost]</span>
-    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">CreateProduct</span>(
-        <span style="color: #7D9029">[FromServices]</span> ProductsService service,
-        <span style="color: #B00040">string</span> code,
-        <span style="color: #B00040">string</span> label)
-    {
-        <span style="color: #008000; font-weight: bold">try</span>
-        {
-            service.CreateProduct(code, label);
-            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>();
-        }
-        <span style="color: #008000; font-weight: bold">catch</span> (ProductsService.InvalidCodeException)
-        {
-            ModelState.AddModelError(nameof(code), <span style="color: #BA2121">&quot;`code` is invalid.&quot;</span>);
-            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">ValidationProblem</span>();
-        }
-        <span style="color: #008000; font-weight: bold">catch</span> (ProductsService.CodeAlreadyUsedException)
-        {
-            ModelState.AddModelError(nameof(code), <span style="color: #BA2121">&quot;`code` is already used.&quot;</span>);
-            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">ValidationProblem</span>();
-        }
-    }
+    productsService.CreateProduct(code, label);
+    DisplaySuccess(<span style="color: #BA2121">&quot;Product created successfully.&quot;</span>);
+}
+<span style="color: #008000; font-weight: bold">catch</span> (ProductsService.InvalidCodeException)
+{
+    DisplayError(<span style="color: #BA2121">&quot;`code` is invalid.&quot;</span>);
+}
+<span style="color: #008000; font-weight: bold">catch</span> (ProductsService.CodeAlreadyUsedException)
+{
+    DisplayError(<span style="color: #BA2121">&quot;`code` is already used.&quot;</span>);
 }
 </pre>
             </div>
             <p>
-                Mais cette approche est peu recommandée. L'article suivant synthétise admirablement les reproche à cette technique :
+                Mais cette approche est peu recommandée, comme le montre cet article qui synthétise les critiques fait à cette technique :
             </p>
             <p>
-                <a href="https://wiki.c2.com/?DontUseExceptionsForFlowControl" >Dont Use Exceptions For Flow Control</a>
+                <a href="https://enterprisecraftsmanship.com/posts/exceptions-for-flow-control/" >Exceptions for flow control in C#</a>
             </p>
             <p>
-                Pour ma part, ma principale critique est que les exceptions ne font pas parti de la signature de la méthode (pour la majorité des langages). De ce fait, les outils d'analyse ne peuvent pas correctement aider le développeur. Notamment en l'avertissant des cas qui ne sont pas correctement traités.
+                Pour ma part, mon principal reproche est que les exceptions ne font pas parti de la signature de la méthode (pour la majorité des langages). De ce fait, les outils d'analyse ne peuvent pas correctement aider le développeur. Notamment en l'avertissant des cas qui ne sont pas correctement traités.
             </p>
-            <h3>Avec le typage</h3>
+            <h3>Avec une énumération</h3>
             <p>
-                J'ai eu l'occasion de travailler avec une application où cette complexité était traitée de manière originale. Certaines méthodes renvoyées un type de base <strong>Result</strong> :
+                Une autre solution est d'utiliser une énumération pour définir les différents cas possibles :
             </p>
             <!-- HTML generated using hilite.me -->
-            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
-                <pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsService</span> : ProductsServiceBase
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">class</span> <span style="color: #BB0066; font-weight: bold">ProductsService</span> <span style="color: #888888">//: ProductsServiceBase</span>
 {
-    <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">abstract</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">Result</span> { }
-    <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">Success</span> : Result { }
-    <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">InvalidCode</span> : Result { }
-    <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">CodeAlreadyUsed</span> : Result { }
-
-    <span style="color: #008000; font-weight: bold">public</span> Result <span style="color: #0000FF">CreateProduct</span>(<span style="color: #B00040">string</span> code, <span style="color: #B00040">string</span> label)
+    <span style="color: #008800; font-weight: bold">public</span> <span style="color: #008800; font-weight: bold">enum</span> CreateProductResult
     {
-        <span style="color: #008000; font-weight: bold">if</span> (!CheckCodeIsValid(code))
-            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000; font-weight: bold">new</span> <span style="color: #0000FF">InvalidCode</span>();
-        <span style="color: #008000; font-weight: bold">if</span> (!CheckCodeIsAvailable(code))
-            <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000; font-weight: bold">new</span> <span style="color: #0000FF">CodeAlreadyUsed</span>();
+        Success,
+        InvalidCode,
+        CodeAlreadyUsed,
+    }
+
+    <span style="color: #008800; font-weight: bold">public</span> CreateProductResult <span style="color: #0066BB; font-weight: bold">CreateProduct</span>(<span style="color: #333399; font-weight: bold">string</span> code, <span style="color: #333399; font-weight: bold">string</span> label)
+    {
+        <span style="color: #008800; font-weight: bold">if</span> (!CheckCodeIsValid(code))
+            <span style="color: #008800; font-weight: bold">return</span> CreateProductResult.InvalidCode;
+        <span style="color: #008800; font-weight: bold">if</span> (!CheckCodeIsAvailable(code))
+            <span style="color: #008800; font-weight: bold">return</span> CreateProductResult.CodeAlreadyUsed;
 
         CreateProductImpl(code, label);
-        <span style="color: #008000; font-weight: bold">return</span> <span style="color: #008000; font-weight: bold">new</span> <span style="color: #0000FF">Success</span>();
+        <span style="color: #008800; font-weight: bold">return</span> CreateProductResult.Success;
     }
-}
-</pre>
-            </div>
-            <p>
-                L'appelant devait ensuite vérifier le type réel du retour pour traiter le résultat :
-            </p>
-            <!-- HTML generated using hilite.me --><div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
-{
-    <span style="color: #7D9029">[HttpPost]</span>
-    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">CreateProduct</span>(
-        <span style="color: #7D9029">[FromServices]</span> ProductsService service,
-        <span style="color: #B00040">string</span> code,
-        <span style="color: #B00040">string</span> label)
-    {
-        <span style="color: #B00040">var</span> result = service.CreateProduct(code, label);
-        <span style="color: #008000; font-weight: bold">switch</span> (result)
-        {
-            <span style="color: #008000; font-weight: bold">case</span> ProductsService.Success:
-                <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">Ok</span>();
-            <span style="color: #008000; font-weight: bold">case</span> ProductsService.InvalidCode:
-                ModelState.AddModelError(nameof(code), <span style="color: #BA2121">&quot;`code` is invalid.&quot;</span>);
-                <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">ValidationProblem</span>();
-            <span style="color: #008000; font-weight: bold">case</span> ProductsService.CodeAlreadyUsed:
-                ModelState.AddModelError(nameof(code), <span style="color: #BA2121">&quot;`code` is already used.&quot;</span>);
-                <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">ValidationProblem</span>();
-            <span style="color: #008000; font-weight: bold">default</span>:
-                <span style="color: #008000; font-weight: bold">throw</span> <span style="color: #008000; font-weight: bold">new</span> <span style="color: #0000FF">InvalidOperationException</span>(
-                    <span style="color: #BA2121">$&quot;Unexpected result from {nameof(ProductsService)}.{nameof(ProductsService.CreateProduct)}.&quot;</span>
-                );
-        }
-    }
+
+    ...
 }</pre>
             </div>
             <p>
-                Ma principale critique avec cette technique, c'est que les différentes possibilités de retour ne sont pas explicitement définis. De ce fait, les outils d'analyse ne peuvent pas correctement aider le développeur. Notamment en lui indiquant que tous les cas ne sont pas correctement traités.
+                Ainsi, il est possible de traiter chaque cas particulier de manière explicite :
+            </p>
+            <!-- HTML generated using hilite.me -->
+             <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #333399; font-weight: bold">var</span> result = productsService.CreateProduct(code, label);
+<span style="color: #008800; font-weight: bold">switch</span> (result)
+{
+    <span style="color: #008800; font-weight: bold">case</span> ProductsService.CreateProductResult.Success:
+        DisplaySuccess(<span style="color: #BA2121">&quot;Product created successfully.&quot;</span>);
+        <span style="color: #008800; font-weight: bold">break</span>;
+    <span style="color: #008800; font-weight: bold">case</span> ProductsService.CreateProductResult.InvalidCode:
+        DisplayError(<span style="color: #BA2121">&quot;`code` is invalid.&quot;</span>);
+        <span style="color: #008800; font-weight: bold">break</span>;
+    <span style="color: #008800; font-weight: bold">case</span> ProductsService.CreateProductResult.CodeAlreadyUsed:
+        DisplayError(<span style="color: #BA2121">&quot;`code` is already used.&quot;</span>);
+        <span style="color: #008800; font-weight: bold">break</span>;
+    <span style="color: #008800; font-weight: bold">default</span>:
+        <span style="color: #008800; font-weight: bold">throw</span> <span style="color: #008800; font-weight: bold">new</span> <span style="color: #0066BB; font-weight: bold">InvalidOperationException</span>();
+}
+</pre>
+            </div>
+            <p>
+                Ainsi, chaque cas est traité explicitement. De plus, le compilateur peut avertir si un cas n'est pas traité avec la règle d'analyse "<a href="https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0010">Add missing cases to switch statement (IDE0010)</a>".
             </p>
             <p>
-                Bien qu'on évite certains écueils des exceptions, cela n'est toujours pas satisfaisant.
+                Cependant, cette technique a aussi des limitations. En outre, il n'est pas possible de retourner des informations complémentaires. Par exemple, il sera plus difficile de retourner l'identifiant du produit créer ou autres informations générées lors de la création.
             </p>
-            <blockquote class="quote">
-                Pour cet exemple, il aurait été possible d'utiliser une énumération. Le code serait similaire, ainsi que les critiques formulées. Mais généralement, on a besoin de retourner des informations complémentaires avec l'erreur, nécessitant d'utiliser des classes.
-            </blockquote>
             <h3>Avec OneOf</h3>
             <p>
-                <strong>OneOf</strong> est une librairie .NET amenant le type <strong>OneOf</strong>. Ce type permet d'encapsuler une valeur et de définir les différents types possibles pour cette valeur. Ainsi, en retournant une instance de <strong>OneOf</strong>, on retourne une valeur qui peut être de plusieurs types explicitement définis :
+                <a href="https://www.nuget.org/packages/OneOf">OneOf</a> est une bibliothèque .NET permettant de simuler une opération <a href="https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/discriminated-unions">d'unions discriminées</a>, fonctionnalité absente en C# (<a href="https://github.com/dotnet/csharplang/issues/7544">Simple encoding of unions in C#</a>).
+            </p>
+            <p>
+                Ainsi, on peut retourner une instance de <strong>OneOf</strong> qui peut contenir une valeur de plusieurs types explicitement définis :
             </p>
             <!-- HTML generated using hilite.me -->
             <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
@@ -208,6 +191,7 @@
     <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">struct</span> <span style="color: #0000FF; font-weight: bold">Success</span> { }
     <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">struct</span> <span style="color: #0000FF; font-weight: bold">InvalidCode</span> { }
     <span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">struct</span> <span style="color: #0000FF; font-weight: bold">CodeAlreadyUsed</span> { }
+
     <span style="color: #008000; font-weight: bold">public</span> OneOf&lt;Success, InvalidCode, CodeAlreadyUsed&gt;
             CreateProduct(<span style="color: #B00040">string</span> code, <span style="color: #B00040">string</span> label)
     {
@@ -227,37 +211,20 @@
                 Ainsi, l'appelant doit explicitement traiter chaque type de résultat possible :
             </p>
             <!-- HTML generated using hilite.me -->
-            <div style="background: #f8f8f8; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
-                <pre style="margin: 0; line-height: 125%"><span style="color: #008000; font-weight: bold">public</span> <span style="color: #008000; font-weight: bold">class</span> <span style="color: #0000FF; font-weight: bold">ProductsController</span> : ControllerBase
-{
-    <span style="color: #7D9029">[HttpPost]</span>
-    <span style="color: #008000; font-weight: bold">public</span> IActionResult <span style="color: #0000FF">CreateProduct</span>(
-        <span style="color: #7D9029">[FromServices]</span>ProductsService service,
-        <span style="color: #B00040">string</span> code,
-        <span style="color: #B00040">string</span> label)
-    {
-        <span style="color: #B00040">var</span> result = service.CreateProduct(code, label);
-        <span style="color: #008000; font-weight: bold">return</span> result.Match&lt;IActionResult&gt;(
-            success =&gt; Ok(),
-            invalidCode =&gt; {
-                ModelState(nameof(code), <span style="color: #BA2121">&quot;`code` is invalid.&quot;</span>);
-                <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">ValidationProblem</span>();
-            },
-            codeAlreadyUsed =&gt; {
-                ModelState(nameof(code), <span style="color: #BA2121">&quot;`code` is already used.&quot;</span>);
-                <span style="color: #008000; font-weight: bold">return</span> <span style="color: #0000FF">ValidationProblem</span>();
-            }
-        );
-    }
-}</pre></div>
+             <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #333399; font-weight: bold">var</span> result = productsService.CreateProduct(code, label);
+result.Switch(
+    success =&gt; DisplaySuccess(<span style="color: #BA2121">&quot;Product created successfully.&quot;</span>),
+    invalidCode =&gt; DisplayError(<span style="color: #BA2121">&quot;`code` is invalid.&quot;</span>),
+    codeAlreadyUsed =&gt; DisplayError(<span style="color: #BA2121">&quot;`code` is already used.&quot;</span>)
+);
+</pre>
+            </div>
             <p>
-                De même, comme la signature de la méthode est explicite, il est facile de revenir sur un code utilisant <strong>OneOf</strong>, même après plusieurs mois.
+                Ainsi, si un cas n'est pas traité, le code ne compile pas. De même, si on ajoute un nouveau cas, alors on aura la garantie par le compilateur que ce nouveau cas est correctement traité par les appelants. Cela facilite les évolutions.
             </p>
             <p>
-                Ainsi , si un cas n'est pas traité, le code ne compile pas. De même, si on ajoute un nouveau cas, alors on aura la garantie par le compilateur que ce nouveau cas est correctement traité. Cela facilite les évolutions.
-            </p>
-            <p>
-                Par contre, je ne trouve pas le code correspondant élégant, mais c'est une l'approche la plus satisfaisante à ce jour que je connaisse.
+                Par contre, je ne trouve pas le code correspondant élégant, mais c'est l'approche la plus satisfaisante à ce jour que je connaisse.
             </p>
             <blockquote class="end-quote">
                 <p>
