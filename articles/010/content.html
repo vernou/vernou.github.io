@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">03 avril 2022</span>
+            <h2>
+                VueJS:
+                <br>
+                Afficher les erreurs de validation métier avec Vuetify et VeeValidate
+            </h2>
+            <p>
+              Plusieurs précédents articles détaillaient comment gérer les erreurs coté serveur pour retourner au client des informations exploitables. La prochaine étape est d'explorer comment le client peut traiter ces données pour les afficher de manière compréhensible à l'utilisateur.
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Cresonnière">
+                <figcaption>Cresonnière</figcaption>
+            </figure>
+            <h3>Validation client/serveur</h3>
+            <p>
+              La validation client est une étape effectué par le client, consistant à valider les données saisies, avant d'effectuer une action, comme envoyer les données au serveur. Par exemple, si l'utilisateur saisie un email, le client peut vérifier si l'email est valide avant de l'envoyer au serveur.
+            </p>
+            <p>
+              La validation serveur est une étape effectué par le serveur, consistant à vérifier que les données envoyées par le client sont correctes. Pour reprendre l'exemple précédent, le client envoit un email au serveur, ce dernier va vérifier que l'email est valide puis vérifier que l'email est disponible.
+            </p>
+            <p>
+              Ce n'est pas une erreur, le serveur refait la validation effectué par le client. Il s'agit d'un principe de sécurité <a href="https://security.stackexchange.com/questions/105389/dont-trust-the-client">Don't trust the client</a>. Le serveur ne doit jamais faire confiance aux requêtes provenant d'un client. Il n'y a aucune garantie que le client a correctement effectué les validations. Donc le serveur doit refaire toutes les validations effectuées par le client.
+            </p>
+            <p>
+              Comme de toute manière le serveur s'occupe de la validation, la validation est optionnelle coté client. Mais elle a l'avantage d'éviter des échanges avec le serveur. En plus d'allèger l'infrastructure, l'utilisateur sera plus rapidement notifié en cas d'erreur de saisie. Optionnelle, mais fortement recommandée.
+            </p>
+            <h3>Vuetify</h3>
+            <p>
+              Vuetify est un Framework basé sur VueJS permettant de développer des interfaces utilisateurs. Il s'agit du Framework que j'utilise actuellement, donc je vais m'appuyer dessus pour montrer comment afficher les erreurs de validation.
+            </p>
+            <p>
+                Dans Vuetify, chaque composant de saisie à la propriété d'entrée "error-messages" qui accepte une chaîne de caractères ou un tableau de chaîne de caractères (permetant d'afficher plusieurs erreurs simultanément). Tout simplement... du moins si cette propriété était correctement documentée, car elle est vaguement évoquée dans différente page de la documentation.
+            </p>
+            <p>
+                Par exemple dans la documentation du composant <a href="https://vuetifyjs.com/en/components/inputs">v-input</a>, dans la liste des propriétés, il n'y a pas "error-messages". Pourtant dans la description de la propriété <a href="https://vuetifyjs.com/en/components/inputs/#error">error</a>, il en fait mention :
+            </p>
+            <blockquote class="quote">
+                <p>
+                    As any validatable Vuetify component, <strong>v-input</strong> can be set to error state using <strong>error</strong> prop, messages can be added using <strong>error-messages</strong> prop. You can determine error messages count to show using <strong>error-count</strong> property.
+                </p>
+                <br>
+                <p>
+                    Comme tout composant Vuetify validable, <strong>v-input</strong> peut être défini sur l'état d'erreur à l'aide de la propriété <strong>error</strong>, des messages peuvent être ajoutés à l'aide de la propriété <strong>error-messages</strong>. Vous pouvez déterminer le nombre de messages d'erreur à afficher à l'aide de la propriété <strong>error-count</strong>.
+                </p>
+            </blockquote>
+            <p>
+                L'exemple est un formulaire d'inscription composé d'un champ texte pour saisir un email et un bouton pour soumettre l'inscription au serveur :
+            </p>
+            <p>
+                L'appuie sur le bouton déclense la méthode "signIn". Dans un premier temps, elle invoque "this.$refs.form.validate()" qui permet de vérifier si les valeurs saisies respectent les régles de validation. Si une régle de validation (ou plusieurs) n'est pas respecté, alors Vuetify affiche l'erreur de validation :
+            </p>
+            <figure class="articleimg">
+                <img src="picture1.png" alt="Erreur de validation affichée">
+            </figure>
+            <p>
+              Si toutes les régles de validation sont respecté, alors la méthode "validate" retourne "true" et la méthode "signIn" se poursuit. Elle envoit les données aux serveurs, dans l'exemple avec la méthode "createUser".
+            </p>
+            <p>
+              Ensuite, le serveur effectue la validation des données et peut retourner au client une erreur en indiquant les erreurs dans les données. La méthode "createUser" simule cela et léve une erreur indiquant que l'email saisi n'est pas disponible si le domaine est "@gmail.com".
+            </p>
+            <p>
+              Finalement, la méthode "signIn" peut gérer l'erreur levé par le serveur et afficher le détail à l'utilisateur.
+            </p>
+            <p>
+              Dernier point, lorsque l'utilisateur modifie la valeur du champ email saisie, il faut retirer le message d'erreur. Pour cela, une possibilité est d'observer la donnée liée au champ de saisie et de vider la donnée comportant le message d'erreur.
+            </p>
+            <hr>
+            <blockquote class="end-quote">
+                <p>
+                    <strong>
+                        Je ne cherche pas à connaître les réponses,
+                        <br>
+                        je cherche à comprendre les questions.
+                    </strong>
+                </p>
+                <footer>- Confucius</footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>
