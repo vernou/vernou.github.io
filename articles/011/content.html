@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">06 mai 2025</span>
+            <h2>
+                Développer une bibliothèque .NET Open Source avec GitHub et NuGet
+            </h2>
+            <p>
+                En tant que mainteneur de plusieurs bibliothèques .NET pour mon travail, j'ai acquis une certaine
+                expérience à ce sujet. Dans cette article, je vais expliquer ma procédure pour créer une bibliothèque .NET,
+                allant de la création du dépôt sur GitHub à la publication sur NuGet.
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Portail abandonné en forét">
+                <figcaption>Portail abandonné en forét</figcaption>
+            </figure>
+            <h3>1) Créer un dépot GitHub</h3>
+            <p>
+                Lors de la création d'un dépôt GitHub, il faut saisir les informations suivantes:
+            <ul>
+                <li>Saisir dans "Repository Name" le nom de la bibliothèque</li>
+                <li>Saisir dans "Description" une courte description de la bibliothèque</li>
+                <li>Select "Public"</li>
+                <li>Dans "Initialize this repository with:"</li>
+                <ul>
+                    <li>Cochez "Add a README file"</li>
+                    <li>Pour "Add .gitignore", sélectionnez "Visual Studio"</li>
+                    <li>Pour "Choose a license", sélectionnez "MIT License"</li>
+                </ul>
+                <li>Pour finir, cliquer sur le bouton "Create repository"</li>
+            </ul>
+            </p>
+            <img src="picture1.png" alt="Page GitHub pour créer un dépôt avec les champs remplis" />
+            <h3>2) Configurer le dépot GitHub</h3>
+            <p>
+                Dans l'onglet "Settings" du dépôt, il faut configurer les options suivantes:
+            <ul>
+                <li>
+                    Dans "General":
+                    <ul>
+                        <li>
+                            Activer/Désactiver les fonctionnalités en fonction de votre besoin. Dans mon cas, c'est généralement:
+                            <ul>
+                                <li>Issues</li>
+                                <li>Preserve this repository</li>
+                                <li>Discussions Loading</li>
+                            </ul>
+                            <img src="picture2.png" />
+                        </li>
+                        <li>Act</li>
+                    </ul>
+                </li>
+                
+                <li>Dans "Options", cocher "Allow squash merging" et "Allow rebase merging"</li>
+                <li>Dans "Branches", cocher "Require a pull request before merging" et "Require approvals"</li>
+                <li>Dans "Actions", cocher "Enable workflow permissions" et "Read repository contents permission"</li>
+                <li>Dans "Pages", sélectionner la branche principale</li>
+            </ul>
+            </p>
+            <blockquote class="end-quote">
+                <p>
+                    <strong>
+                        One possible testing approach is to swap your production database with SQLite, effectively using
+                        it as a testing "fake".
+                    </strong>
+                </p>
+                <hr>
+                <p>
+                    <strong>
+                        Une approche possible pour tester consiste à substituer le système de gestion de base de données
+                        (SGBD) par SQLite, en l'utilisant comme une base de données factice.
+                    </strong>
+                </p>
+                <footer>- <a
+                        href="https://learn.microsoft.com/en-us/ef/core/testing/choosing-a-testing-strategy#sqlite-as-a-database-fake">Entity
+                        Framework Core documentation - SQLite as a database fake</a></footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>
