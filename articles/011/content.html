@@ -19,12 +19,15 @@
         <div class="wrapper">
             <span class="post-date">06 mai 2025</span>
             <h2>
-                Développer une bibliothèque .NET Open Source avec GitHub et NuGet
+                Développer une bibliothèque .NET Open Source
+                <br />
+                dotnet / GitHub / NuGet
             </h2>
             <p>
                 En tant que mainteneur de plusieurs bibliothèques .NET pour mon travail, j'ai acquis une certaine
-                expérience à ce sujet. Dans cette article, je vais expliquer ma procédure pour créer une bibliothèque .NET,
-                allant de la création du dépôt sur GitHub à la publication sur NuGet.
+                expérience à ce sujet. Dans cette article, je vais expliquer ma procédure pour créer une bibliothèque
+                .NET,
+                allant de la création/configuration du dépôt sur GitHub à la publication sur NuGet.
             </p>
             <figure class="articleimg">
                 <img src="cover.jpg" alt="Portail abandonné en forét">
@@ -33,46 +36,119 @@
             <h3>1) Créer un dépot GitHub</h3>
             <p>
                 Lors de la création d'un dépôt GitHub, il faut saisir les informations suivantes:
+            </p>
             <ul>
                 <li>Saisir dans "Repository Name" le nom de la bibliothèque</li>
                 <li>Saisir dans "Description" une courte description de la bibliothèque</li>
                 <li>Select "Public"</li>
-                <li>Dans "Initialize this repository with:"</li>
-                <ul>
-                    <li>Cochez "Add a README file"</li>
-                    <li>Pour "Add .gitignore", sélectionnez "Visual Studio"</li>
-                    <li>Pour "Choose a license", sélectionnez "MIT License"</li>
-                </ul>
+                <li>
+                    Dans "Initialize this repository with:"
+                    <ul>
+                        <li>Cochez "Add a README file"</li>
+                        <li>Pour "Add .gitignore", sélectionnez "Visual Studio"</li>
+                        <li>Pour "Choose a license", sélectionnez "MIT License"</li>
+                    </ul>
+                </li>
                 <li>Pour finir, cliquer sur le bouton "Create repository"</li>
             </ul>
-            </p>
             <img src="picture1.png" alt="Page GitHub pour créer un dépôt avec les champs remplis" />
-            <h3>2) Configurer le dépot GitHub</h3>
+
+            <h3>2) Initialiser la solution .NET</h3>
+            <p>
+                Les commandes suivantes permettent d'initialiser une solution .NET avec un projet de bibliothèque et son projet de test :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #888888"># Clone et prépare le dépôt</span>
+git clone https://github.com/vernou/Vernou.Librairies.Example.git
+<span style="color: #007020">cd </span>Vernou.Librairies.Example
+
+<span style="color: #888888"># Crée le dossier &quot;src&quot; pour ranger le code source des projets</span>
+mkdir src
+<span style="color: #007020">cd </span>src
+
+<span style="color: #888888"># Crée le projet de la bibliothèque</span>
+dotnet new classlib --name Vernou.Librairies.Example
+
+<span style="color: #888888"># Crée le projet de test</span>
+dotnet new xunit --name Vernou.Librairies.Example.Tests
+dotnet add Vernou.Librairies.Example.Tests reference Vernou.Librairies.Example
+dotnet add Vernou.Librairies.Example.Tests package Shouldly
+
+<span style="color: #888888"># Crée la solution</span>
+dotnet new sln --name Vernou.Librairies.Example --format slnx
+dotnet sln add Vernou.Librairies.Example
+dotnet sln add Vernou.Librairies.Example.Tests
+
+<span style="color: #888888"># Vérfie que la solution compile et les tests passent</span>
+dotnet <span style="color: #007020">test</span>
+
+<span style="color: #888888"># Pousse les projets sur GitHub</span>
+git add *
+git commit -m <span style="background-color: #fff0f0">&quot;Initialize the solution&quot;</span>
+git push</pre>
+            </div>
+            <h3>3) Mise en place de l'intégration continue</h3>
+            <p>
+                TODO
+            </p>
+            <h3>4) Configurer le dépot GitHub</h3>
             <p>
                 Dans l'onglet "Settings" du dépôt, il faut configurer les options suivantes:
+            </p>
             <ul>
                 <li>
                     Dans "General":
                     <ul>
                         <li>
-                            Activer/Désactiver les fonctionnalités en fonction de votre besoin. Dans mon cas, c'est généralement:
+                            Activer/Désactiver les fonctionnalités en fonction de vos besoins. Dans mon cas, c'est généralement:
                             <ul>
                                 <li>Issues</li>
                                 <li>Preserve this repository</li>
-                                <li>Discussions Loading</li>
+                                <li>Discussions</li>
                             </ul>
-                            <img src="picture2.png" />
+                            <img src="picture2.png" alt="Fonctionnalités activées" />
                         </li>
-                        <li>Act</li>
+                        <li>
+                            Pour "Pull Requests":
+                            <ul>
+                                <li>Autorisez uniquement la fusion "Squash"</li>
+                                <li>Cochez "Always suggest updating pull request branches"</li>
+                                <li>Cocher "Automatically delete head branches"</li>
+                            </ul>
+                            <img src="picture3.png" alt="Configuration générale des demandes de tirage" />
+                        </li>
                     </ul>
                 </li>
-                
-                <li>Dans "Options", cocher "Allow squash merging" et "Allow rebase merging"</li>
-                <li>Dans "Branches", cocher "Require a pull request before merging" et "Require approvals"</li>
-                <li>Dans "Actions", cocher "Enable workflow permissions" et "Read repository contents permission"</li>
-                <li>Dans "Pages", sélectionner la branche principale</li>
+                <li>
+                    Dans "Rules > Rulesets":
+                    <ul>
+                        <li>
+                            Cliquer sur "New branch ruleset"
+                            <br />
+                            <img src="picture4.png" alt="Créer une régle de gestion des branches" />
+                        </li>
+                        <li>Saisir dans "Ruleset Name" "default-branches"</li>
+                        <li>Dans "Enforcement status", sélectionnez "Active"</li>
+                        <li>
+                            Dans "Target branches", sélectionnez "Include default branch"
+                            <br />
+                            <img src="picture5.png" alt="Configuration de la régle de gestion" />
+                        </li>
+                        <li>
+                            Dans "Branch rules"
+                            <ul>
+                                <li>Cocher "Restrict deletions"</li>
+                                <li>Cocher "Require linear history"</li>
+                                <li>Cocher "Require a pull request before merging" avec l'option "Require conversation resolution before merging"</li>
+                                <li>Cocher "Block force pushes"</li>
+                            </ul>
+                            <img src="picture6.png" alt="Configuration de la régle de gestion (suite)" />
+                        </li>
+                        <li>Cliquer sur "Create"</li>
+                    </ul>
+                </li>
             </ul>
-            </p>
             <blockquote class="end-quote">
                 <p>
                     <strong>
@@ -87,8 +163,7 @@
                         (SGBD) par SQLite, en l'utilisant comme une base de données factice.
                     </strong>
                 </p>
-                <footer>- <a
-                        href="https://learn.microsoft.com/en-us/ef/core/testing/choosing-a-testing-strategy#sqlite-as-a-database-fake">Entity
+                <footer>- <a href="https://learn.microsoft.com/en-us/ef/core/testing/choosing-a-testing-strategy#sqlite-as-a-database-fake">Entity
                         Framework Core documentation - SQLite as a database fake</a></footer>
             </blockquote>
         </div>
