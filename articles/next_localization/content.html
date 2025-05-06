@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Blog d'un primate dans l'espace</title>
+    <link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body>
+    <header class="site-header centered">
+        <img src="../../header.jpg" class="photo" alt="Le singe de l'espace" />
+        <h1>Blog d'un primate dans l'espace</h1>
+        <nav class="site-nav">
+            <a href="../../index.html">Accueil</a>
+        </nav>
+    </header>
+    <article class="centered">
+        <div class="wrapper">
+            <span class="post-date">27 avril 2021</span>
+            <h2>Localisation en .NET</h2>
+            <p>
+                Travaillant pour une multinationale,
+                je dois réaliser des applications pour des utilisateurs répartis dans plusieurs pays.
+                L'étape de localisation (adapter un logiciel à un pays) consiste
+                Bien que .NET dispose de nombreux mécanismes qui facilitent la localisation,
+                cette étape peut rapidement devenir un casse tête.
+            </p>
+            <p>
+                L'excellente documentation officiel réalisée par Microsoft est un bon point d'entrée,
+                mais elle est très verbeuse, disparatre et parfois même
+                <a href="https://github.com/dotnet/dotnet-api-docs/issues/5188">obsolète</a>.
+                L'objectif de cette article est de faire un tour des mécanismes de localisation en .NET,
+                d'aborder quelques subtilités et d'indiquer les erreurs communes.
+            </p>
+            <figure class="articleimg">
+                <img src="cover.jpg" alt="Les applications franchissents aussi des frontières">
+                <figcaption>Les applications franchissents aussi des frontières</figcaption>
+            </figure>
+            <h3>L'importance de la localisation</h3>
+            <p>
+                La localisation (ou internationalisation) consiste à adapter une application à la culture d'un autre pays.
+                L'exemple le plus fagrant étant la traduction des libellés.
+                Mais il y a d'autres types d'élement a adapté comme les images, les symboles, la représentation d'un nombre/d'une date/d'une monaie.
+            </p>
+            <p>
+                Par exemple, en France on écrit le jour puis le mois date puis l'année,
+                mais aux États-Unis c'est le mois puis le jour puis l'année.
+                Donc "01/04/2001" signifit en France le 1er avril 2001 et en Etas Unis le 4 janvier 2001.
+                Dans une application disposant d'un agenda afficher la date dans le mauvais format peut être dramatique
+                (faire louper un rendez-vous important).
+            </p>
+            <p>
+                Autre exemple, en France on utilise la virgule pour séparer la partie entiére de la partie décimale d'un nombre,
+                mais les Etats Unis utilise la virgule comme séparateur de millier.
+                Donc "3,001" signit en france trois et un centième et aux Etats Unis trois mille un.
+                Imager une facture où le montant est représenté dans le mauvais format...
+            </p>
+            <p>
+                Si l'information saisie par l'utilisateur n'est pas correctement interprétée ou si elle n'est pas correctement restituée à l'utilisateur,
+                cela peut avoir des conséquences non négligeable.
+                La grande majorité des applications manipulent des dates et des nombres,
+                il est nécessaire de maitricer ces notions.
+            </p>
+            <h3>La classe CultureInfo</h3>
+            <p>
+                La classe CultureInfo de l'espace de nom System.Globalisation permet de définir une culture.
+                Cette classe définit le format des nombres, des dates, des monaies, ...
+                par l'implémentation des interfaces suivantes :
+            </p>
+            <ul>
+                <li>IFormatNumber : Définit le format des nombres</li>
+                <li>IFormatDateTime : Définit le format des dates</li>
+                <li>ICurrency : Définit le format des monaies</li>
+            </ul>
+            <p>
+                Il est possible de charger la culture d'un pays (voir région) en passant l'id culture en paramètre du constructeur :
+            </p>
+            <pre>var cultureFr = new CultureInfo("fr");
+var cultureEn = new CultureInfo("en");
+var cultureBe = new CultureInfo("fr-BE"); //Pour la Belgique, une fois</pre>
+            <blockquote class="quote">
+                Il est possible de définir une culture propre, mais c'est cas marginale que l'on n'abordera pas.
+            </blockquote>
+            <p>
+                Cette culture permet de définir le formatage des nombres par la méthode ToString :
+            </p>
+                <pre>Console.WriteLine(7777.666.ToString(new CultureInfo("fr")));
+// "7777,666"
+Console.WriteLine(7777.666.ToString(new CultureInfo("en")));
+// "7777.666"</pre>
+            <p>De même, la culture définit comment interpreter les nombres avec Parse :</p>
+            <pre>var d1 = Double.Parse("7777,666", new CultureInfo("fr"));
+Console.WriteLine(d1 == 7777.666);
+// True
+var d2 = Double.Parse("7777.666", new CultureInfo("en"));
+Console.WriteLine(d2 == 7777.666);
+// True
+var d3 = Double.Parse("7777,666", new CultureInfo("en"));
+Console.WriteLine(d3 == 7777666);
+// True
+var d4 = Double.Parse("7777.666", new CultureInfo("fr"));
+//System.FormatException: Input string was not in a correct format.</pre>
+            <blockquote class="quote">
+                Idem avec DateTime.ToString et DateTime.Parse (et ses variantes)
+            </blockquote>
+            <p>
+                Les informations de la culture provient de l'OS,
+                donc il peut y avoir des différences en fonction de l'OS exécutant le programme.
+            </p>
+            <ul>
+                <li>https://github.com/dotnet/runtime/issues/18345</li>
+                <li>https://github.com/dotnet/runtime/issues/26088</li>
+            </ul>
+            <h3>CultureInfo.CurrentCulture</h3>
+            <p>
+                Une application .NET s'initialise avec la culture 
+                La propriété statique CultureInfo.CurrentCulture représente la culture utilisée par l'application.
+                Elle est initialisé avec la culture de l'utilisateur ayant démarrer l'application (cela peut varier en fonction des OS).
+            </p>
+            <p>
+                Cette propriété permet de récupérer la culture courante, mais aussi de la changer en cours d'exécution :
+            </p>
+            <pre>
+                Console.WriteLine(CultureInfo.CurrentCulture);
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+                Console.WriteLine(CultureInfo.CurrentCulture);
+                // Output :
+                // fr-FR
+                // en-US
+            </pre>
+            <p>
+                La culture courrante va notomant déterminer l'affichage d'une date ou d'un nombre :
+            </p>
+            <pre>
+                Console.WriteLine(CultureInfo.CurrentCulture);
+                Console.WriteLine(7777.666);
+                Console.WriteLine(new DateTime(1989, 11, 27));
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+                Console.WriteLine(CultureInfo.CurrentCulture);
+                Console.WriteLine(7777.666);
+                Console.WriteLine(new DateTime(1989, 11, 27));
+                // Output :
+                // fr-FR
+                // 7777,666
+                // 27/11/1989 00:00:00
+                // en-US
+                // 7777.666
+                // 11/27/1989 12:00:00 AM
+            </pre>
+            <p>
+                De même, la culture courrante influence comment est interprété une chaîne de caractère en date ou nombre :
+            </p>
+            <pre>
+                Console.WriteLine(CultureInfo.CurrentCulture);
+                Console.WriteLine(double.Parse("7777,666"));
+                Console.WriteLine(DateTime.Parse("27/11/1989"));
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+                Console.WriteLine(CultureInfo.CurrentCulture);
+                Console.WriteLine(double.Parse("7777,666"));
+                Console.WriteLine(double.Parse("7777.666"));
+                Console.WriteLine(DateTime.Parse("11/27/1989"));
+                // Output :
+                // fr-FR
+                // 7777,666
+                // 27/11/1989 00:00:00
+                // en-US
+                // 7777666
+                // 7777.666
+                // 1
+            </pre>
+            <blockquote class="quote">
+                Remarquez comment "7777,666" est interprété en anglais américains.
+                D'où l'importance du contexte lors d'une convertion de/vers une chaîne de caractère.
+            </blockquote>
+            <p>
+                Il est possible de préciser la culture lors de la convertion pour s'abtraire de la culture courante :
+            </p>
+            <pre>
+                Console.WriteLine(CultureInfo.CurrentCulture);
+                Console.WriteLine(double.Parse("7777,666"));
+                Console.WriteLine(double.Parse("7777,666"), new CultureInfo("en-US"));
+                // Output :
+                // fr-FR
+                // 7777,666
+                // 7777666
+            </pre>
+            <blockquote>
+                Il est conseillé de toujours préciser la culture à utiliser pour une convertion.
+                Même pour la culture courante, il est préférable d'explicitement passer en paramètre CultureInfo.CurrentCulture.
+                D'ailleurs, la majorité des outils d'analyse de code alerte à ce sujet,
+                comme <a href="https://rules.sonarsource.com/csharp/RSPEC-4056">SonarQube</a>.
+            </blockquote>
+            <h3>Multi-Thread</h3>
+            <p>
+                En réalité, CultureInfo.CurrentCulture représente la culture courante du thread en courant.
+                C'est à dire qu'en fonction du thread, CultureInfo.CurrentCulture peut retourner des valeurs différentes.
+                Très pratiques par exemple pour une application Web qui doit gérer simultanément plusieurs utilisateurs avec des cultures différentes.
+            </p>
+            <p>
+                Dans la version .NET Framework 4 et celles antérieurs, chaque thread initialise CultureInfo.CurrentCulture avec les informations du système.
+                Donc il fallait au début de chaque Thread affecter la culture courante.
+            </p>
+            <p>
+                Il a fallut attendre .NET Framework 4.5 pour voir ajouter la propriété CultureInfo.DefaultThreadCurrentCulture.
+                Cette propriété définit la culuture courante de chaque nouveau thread.
+            </p>
+            <blockquote class="quote">
+                Bien que cette propriété est encore présente dans les versions récentes (pour des raisons de rétrocompatibilité),
+                je préconise de ne plus l'utiliser au profit de la méthode décrite par la suite.
+            </blockquote>
+            <p>
+                À partir de .NET Framework 4.6.1 et jusqu'à maintenant (y compris en .NET Core et .NET 5+),
+                un nouveau thread hérite de la culture courante du thread l'ayant démarré.
+                Exemple :
+            </p>
+            <pre>
+class Program
+{
+    static void Main(string[] args)
+    {
+        CultureInfo.CurrentCulture = new CultureInfo("en-US");
+        Thread.CurrentThread.Name = "Main";
+        DisplayThreadCulture();
+        var thread = new Thread(Work);
+        thread.Name = "Work";
+        thread.Start();
+    }
+
+    static void DisplayThreadCulture() =>
+        Console.WriteLine($"{Thread.CurrentThread.Name} - {CultureInfo.CurrentCulture.Name}");
+
+    static void Work() =>
+        DisplayThreadCulture();
+}
+// Output :
+// Main - en-US
+// Work - en-US
+            </pre>
+            <p>
+                Évidement, affecter la culture courante du thread enfant n'affecte pas le thread parent :
+            </p>
+            <pre>
+class Program
+{
+    static void Main(string[] args)
+    {
+        CultureInfo.CurrentCulture = new CultureInfo("en-US");
+        Thread.CurrentThread.Name = "Main";
+        DisplayThreadCulture();
+        var thread = new Thread(Work);
+        thread.Name = "Work";
+        thread.Start();
+        thread.Join();
+        DisplayThreadCulture();
+    }
+
+    static void DisplayThreadCulture() =>
+        Console.WriteLine($"{Thread.CurrentThread.Name} - {CultureInfo.CurrentCulture.Name}");
+
+    static void Work()
+    {
+        CultureInfo.CurrentCulture = new CultureInfo("fr-BE");
+        DisplayThreadCulture();
+    }
+}
+// Output :
+// Main - en-US
+// Work - fr-BE
+// Main - en-US
+            </pre>
+            <h3>async/await</h3>
+            <p>
+                Avec .NET Framework 4.5 et les versions antérieurs, le culture courante d'une tâche est la culture du thread où elle est exécutée.
+            </p>
+            <p>
+                À partir de .NET Framework 4.6.1, la culture est une part du context de la tâche.
+                C'est à dire, que chaque tâche hérite de la culture courante de la tâche parente.
+                Quand à la première tâche, elle récupére la culture courante du thread l'ayant où elle s'exécute.
+            </p>
+            <blockquote class="end-quote">
+                <p>
+                    <strong>
+                        ...
+                    </strong>
+                </p>
+                <hr>
+                <p>
+                    <strong>
+                        ...
+                    </strong>
+                </p>
+                <footer>- <a href="https://en.wikipedia.org/wiki/Dependency_hell">Wikipedia</a></footer>
+            </blockquote>
+        </div>
+    </article>
+</body>
+
+</html>
