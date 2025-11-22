@@ -24,10 +24,7 @@
                 dotnet / GitHub / NuGet
             </h2>
             <p>
-                En tant que mainteneur de plusieurs bibliothèques .NET pour mon travail, j'ai acquis une certaine
-                expérience à ce sujet. Dans cette article, je vais expliquer ma procédure pour créer une bibliothèque
-                .NET,
-                allant de la création/configuration du dépôt sur GitHub à la publication sur NuGet.
+                Dans mon travail, j'ai régulièrement besoin de créer des bibliothèques .NET. Mais pas suffisamment pour que je me souvienne parfaitement de la procédure. Dans cette article, je détaille les étapes que je suis pour créer une bibliothèque .NET, depuis la création et la configuration du dépôt GitHub jusqu'à la publication sur NuGet.
             </p>
             <figure class="articleimg">
                 <img src="cover.jpg" alt="Portail abandonné en forét">
@@ -38,15 +35,19 @@
                 Lors de la création d'un dépôt GitHub, il faut saisir les informations suivantes:
             </p>
             <ul>
-                <li>Saisir dans "Repository Name" le nom de la bibliothèque</li>
-                <li>Saisir dans "Description" une courte description de la bibliothèque</li>
-                <li>Select "Public"</li>
-                <li>
-                    Dans "Initialize this repository with:"
+                <li>Remplir dans <strong>"General"</strong> :
                     <ul>
-                        <li>Cochez "Add a README file"</li>
-                        <li>Pour "Add .gitignore", sélectionnez "Visual Studio"</li>
-                        <li>Pour "Choose a license", sélectionnez "MIT License"</li>
+                        <li>Sélectionner dans <strong>"Owner"</strong> l'utilisateur ou l'organisation qui sera le propriétaire du dépôt</li>
+                        <li>Saisir dans <strong>"Repository Name"</strong> le nom de la bibliothèque</li>
+                        <li>Saisir dans <strong>"Description"</strong> une courte description de la bibliothèque</li>
+                    </ul>
+                </li>
+                <li>Remplir dans <strong>"Configuration"</strong> :
+                    <ul>
+                        <li>Sélectionner dans <strong>"Choose visibility"</strong> l'option <strong>"Public"</strong></li>
+                        <li>Activer l'option <strong>"Add README"</strong></li>
+                        <li>Sélectionner dans <strong>"Add .gitignore"</strong> l'option <strong>"VisualStudio"</strong></li>
+                        <li>Sélectionner dans <strong>"Add license"</strong> l'option < strong>"MIT Licence"</strong></li>
                     </ul>
                 </li>
                 <li>Pour finir, cliquer sur le bouton "Create repository"</li>
@@ -68,10 +69,11 @@ mkdir src
 <span style="color: #007020">cd </span>src
 
 <span style="color: #888888"># Crée le projet de la bibliothèque</span>
-dotnet new classlib --name Vernou.Librairies.Example
+dotnet new classlib --name Vernou.Librairies.Example --framework net10.0
 
 <span style="color: #888888"># Crée le projet de test</span>
-dotnet new xunit --name Vernou.Librairies.Example.Tests
+dotnet new install xunit.v3.templates
+dotnet new xunit3 --name Vernou.Librairies.Example.Tests --framework net10.0
 dotnet add Vernou.Librairies.Example.Tests reference Vernou.Librairies.Example
 dotnet add Vernou.Librairies.Example.Tests package Shouldly
 
@@ -80,12 +82,12 @@ dotnet new sln --name Vernou.Librairies.Example --format slnx
 dotnet sln add Vernou.Librairies.Example
 dotnet sln add Vernou.Librairies.Example.Tests
 
-<span style="color: #888888"># Vérfie que la solution compile et les tests passent</span>
+<span style="color: #888888"># Vérifie que la solution compile et les tests passent</span>
 dotnet <span style="color: #007020">test</span>
 
-<span style="color: #888888"># Pousse les projets sur GitHub</span>
+<span style="color: #888888"># Pousse les modiffications sur GitHub</span>
 git add *
-git commit -m <span style="background-color: #fff0f0">&quot;Initialize the solution&quot;</span>
+git commit -m <span style="background-color: #fff0f0">&quot;feat(lib): Initialize the solution&quot;</span>
 git push</pre>
             </div>
             <h3>3) Mise en place de l'intégration continue</h3>
