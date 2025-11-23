@@ -35,19 +35,19 @@
                 Lors de la création d'un dépôt GitHub, il faut saisir les informations suivantes:
             </p>
             <ul>
-                <li>Remplir dans <strong>"General"</strong> :
+                <li>Remplir dans <i>"General"</i> :
                     <ul>
-                        <li>Sélectionner dans <strong>"Owner"</strong> l'utilisateur ou l'organisation qui sera le propriétaire du dépôt</li>
-                        <li>Saisir dans <strong>"Repository Name"</strong> le nom de la bibliothèque</li>
-                        <li>Saisir dans <strong>"Description"</strong> une courte description de la bibliothèque</li>
+                        <li>Sélectionner dans <i>"Owner"</i> l'utilisateur ou l'organisation qui sera le propriétaire du dépôt</li>
+                        <li>Saisir dans <i>"Repository Name"</i> le nom de la bibliothèque</li>
+                        <li>Saisir dans <i>"Description"</i> une courte description de la bibliothèque</li>
                     </ul>
                 </li>
-                <li>Remplir dans <strong>"Configuration"</strong> :
+                <li>Remplir dans <i>"Configuration"</i> :
                     <ul>
-                        <li>Sélectionner dans <strong>"Choose visibility"</strong> l'option <strong>"Public"</strong></li>
-                        <li>Activer l'option <strong>"Add README"</strong></li>
-                        <li>Sélectionner dans <strong>"Add .gitignore"</strong> l'option <strong>"VisualStudio"</strong></li>
-                        <li>Sélectionner dans <strong>"Add license"</strong> l'option < strong>"MIT Licence"</strong></li>
+                        <li>Sélectionner dans <i>"Choose visibility"</i> l'option <b>"Public"</b></li>
+                        <li>Activer l'option <b>"Add README"</b></li>
+                        <li>Sélectionner dans <i>"Add .gitignore"</i> l'option <b>"VisualStudio"</b></li>
+                        <li>Sélectionner dans <i>"Add license"</i> l'option <b>"MIT Licence"</b></li>
                     </ul>
                 </li>
                 <li>Pour finir, cliquer sur le bouton "Create repository"</li>
@@ -70,6 +70,7 @@ mkdir src
 
 <span style="color: #888888"># Crée le projet de la bibliothèque</span>
 dotnet new classlib --name Vernou.Librairies.Example --framework net10.0
+dotnet add Vernou.Librairies.Example package Microsoft.SourceLink.GitHub
 
 <span style="color: #888888"># Crée le projet de test</span>
 dotnet new install xunit.v3.templates
@@ -81,89 +82,200 @@ dotnet add Vernou.Librairies.Example.Tests package Shouldly
 dotnet new sln --name Vernou.Librairies.Example --format slnx
 dotnet sln add Vernou.Librairies.Example
 dotnet sln add Vernou.Librairies.Example.Tests
+</pre>
+            </div>
+            <p>
+                Ensuite, il faut ajouter l'îcone dans le dossier du projet de la bibliothèque à <b>"Assets/icon.png"</b>. Il doit s'agir d'une image au format <i>PNG</i> de 128x128 pixels. Par exemple :
+            </p>
+            <img src="icon.png" alt="Icon" style="display:block;margin:0 auto;"/>
+            <p>
+                Ensuite, il modifier le fichier csproj de la bibliothèque pour y ajouter les informations nécessaires à la publication sur NuGet :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #070">&lt;Project</span><span style="color: #BBB"> </span><span style="color: #00C">Sdk=</span><span style="background-color: #FFF0F0">&quot;Microsoft.NET.Sdk&quot;</span><span style="color: #070">&gt;</span>
 
-<span style="color: #888888"># Vérifie que la solution compile et les tests passent</span>
-dotnet <span style="color: #007020">test</span>
+<span style="color: #BBB">    </span><span style="color: #070">&lt;PropertyGroup&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;TargetFramework&gt;</span>net10.0<span style="color: #070">&lt;/TargetFramework&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;ImplicitUsings&gt;</span>enable<span style="color: #070">&lt;/ImplicitUsings&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;Nullable&gt;</span>enable<span style="color: #070">&lt;/Nullable&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;GenerateDocumentationFile&gt;</span>true<span style="color: #070">&lt;/GenerateDocumentationFile&gt;</span>
+<span style="color: #BBB">    </span><span style="color: #070">&lt;/PropertyGroup&gt;</span>
 
-<span style="color: #888888"># Pousse les modiffications sur GitHub</span>
+<span style="color: #BBB">    </span><span style="color: #888">&lt;!-- NuGet Metadata --&gt;</span>
+<span style="color: #BBB">    </span><span style="color: #070">&lt;PropertyGroup&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;Version&gt;</span>1.0.0<span style="color: #070">&lt;/Version&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;Description&gt;</span>Une<span style="color: #BBB"> </span>courte<span style="color: #BBB"> </span>description<span style="color: #BBB"> </span>jusqu&#39;à<span style="color: #BBB"> </span>4000<span style="color: #BBB"> </span>caractères<span style="color: #070">&lt;/Description&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;Authors&gt;</span>Cédric<span style="color: #BBB"> </span>VERNOU<span style="color: #070">&lt;/Authors&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;PackageProjectUrl&gt;</span>https://github.com/vernou/Vernou.Librairies.Example<span style="color: #070">&lt;/PackageProjectUrl&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;PackageLicenseExpression&gt;</span>MIT<span style="color: #070">&lt;/PackageLicenseExpression&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;PackageTags&gt;</span>aspnetcore,<span style="color: #BBB"> </span>swashbuckle,<span style="color: #BBB"> </span>typedresults,<span style="color: #BBB"> </span>httpresults<span style="color: #070">&lt;/PackageTags&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;PackageReadmeFile&gt;</span>README.md<span style="color: #070">&lt;/PackageReadmeFile&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;PackageIcon&gt;</span>icon.png<span style="color: #070">&lt;/PackageIcon&gt;</span>
+<span style="color: #BBB">    </span><span style="color: #070">&lt;/PropertyGroup&gt;</span>
+
+<span style="color: #BBB">    </span><span style="color: #888">&lt;!-- Source Link --&gt;</span>
+<span style="color: #BBB">    </span><span style="color: #070">&lt;PropertyGroup&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;EmbedUntrackedSources&gt;</span>true<span style="color: #070">&lt;/EmbedUntrackedSources&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;IncludeSymbols&gt;</span>true<span style="color: #070">&lt;/IncludeSymbols&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;RepositoryType&gt;</span>git<span style="color: #070">&lt;/RepositoryType&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;RepositoryUrl&gt;</span>https://github.com/vernou/Vernou.Librairies.Example.git<span style="color: #070">&lt;/RepositoryUrl&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;SymbolPackageFormat&gt;</span>snupkg<span style="color: #070">&lt;/SymbolPackageFormat&gt;</span>
+<span style="color: #BBB">    </span><span style="color: #070">&lt;/PropertyGroup&gt;</span>
+
+<span style="color: #BBB">    </span><span style="color: #070">&lt;ItemGroup&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;None</span><span style="color: #BBB"> </span><span style="color: #00C">Include=</span><span style="background-color: #FFF0F0">&quot;..\..\README.md&quot;</span><span style="color: #BBB"> </span><span style="color: #00C">Pack=</span><span style="background-color: #FFF0F0">&quot;true&quot;</span><span style="color: #BBB"> </span><span style="color: #00C">PackagePath=</span><span style="background-color: #FFF0F0">&quot;\&quot;</span><span style="color: #070">/&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;None</span><span style="color: #BBB"> </span><span style="color: #00C">Include=</span><span style="background-color: #FFF0F0">&quot;Assets\icon.png&quot;</span><span style="color: #BBB"> </span><span style="color: #00C">Pack=</span><span style="background-color: #FFF0F0">&quot;true&quot;</span><span style="color: #BBB"> </span><span style="color: #00C">PackagePath=</span><span style="background-color: #FFF0F0">&quot;\&quot;</span><span style="color: #BBB"> </span><span style="color: #070">/&gt;</span>
+<span style="color: #BBB">    </span><span style="color: #070">&lt;/ItemGroup&gt;</span>
+
+<span style="color: #BBB">    </span><span style="color: #070">&lt;ItemGroup&gt;</span>
+<span style="color: #BBB">        </span><span style="color: #070">&lt;PackageReference</span><span style="color: #BBB"> </span><span style="color: #00C">Include=</span><span style="background-color: #FFF0F0">&quot;Microsoft.SourceLink.GitHub&quot;</span><span style="color: #BBB"> </span><span style="color: #00C">Version=</span><span style="background-color: #FFF0F0">&quot;8.0.0&quot;</span><span style="color: #BBB"> </span><span style="color: #00C">PrivateAssets=</span><span style="background-color: #FFF0F0">&quot;All&quot;</span><span style="color: #070">/&gt;</span>
+<span style="color: #BBB">    </span><span style="color: #070">&lt;/ItemGroup&gt;</span>
+
+<span style="color: #070">&lt;/Project&gt;</span>
+</pre></div>
+            <p>
+                Ensuite, il faut vérifier que l'ensemble compile, que les tests fonctionnent et que le package NuGet se génère correctement :
+            </p>
+            <!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #888"># Se placer dans le dossier de la solution</span>
+            <span style="color: #007020">cd</span><span style="color: #BBB"> </span>src
+
+            <span style="color: #888"># Compile la solution et exécute les projets de test</span>
+            dotnet<span style="color: #BBB"> </span><span style="color: #007020">test</span>
+
+            <span style="color: #888"># Se placer dans le dossier du projet de la bibliotèque</span>
+            <span style="color: #007020">cd</span><span style="color: #BBB"> </span>Vernou.Librairies.Example
+
+            <span style="color: #888"># Génére le package NuGet</span>
+            dotnet<span style="color: #BBB"> </span>pack
+            </pre></div>
+            <p>
+                Finalement, il faut pousser les modifications sur GitHub :
+            </p>
+            <!-- HTML generated using hilite.me -->
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;">
+                <pre style="margin: 0; line-height: 125%"><span style="color: #888888"># Pousse les modiffications sur GitHub</span>
 git add *
 git commit -m <span style="background-color: #fff0f0">&quot;feat(lib): Initialize the solution&quot;</span>
 git push</pre>
-            </div>
             <h3>3) Mise en place de l'intégration continue</h3>
             <p>
-                TODO
+                Dans le dépôt sur GitHub, il faut ajouter le fichier ".github/workflows/ci.yml" :
             </p>
+            <!-- HTML generated using hilite.me -->
+             <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>CI
+
+<span style="color: #070">on</span>:
+<span style="color: #BBB">  </span><span style="color: #070">push</span>:
+<span style="color: #BBB">    </span><span style="color: #070">branches</span>:<span style="color: #BBB"> </span>[<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;main&quot;</span><span style="color: #BBB"> </span>]
+<span style="color: #BBB">  </span><span style="color: #070">pull_request</span>:
+<span style="color: #BBB">    </span><span style="color: #070">branches</span>:<span style="color: #BBB"> </span>[<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;main&quot;</span><span style="color: #BBB"> </span>]
+
+<span style="color: #070">jobs</span>:
+<span style="color: #BBB">  </span><span style="color: #070">ci</span>:
+<span style="color: #BBB">    </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>Build and Test
+<span style="color: #BBB">    </span><span style="color: #070">runs-on</span>:<span style="color: #BBB"> </span>ubuntu-latest
+<span style="color: #BBB">    </span><span style="color: #070">defaults</span>:
+<span style="color: #BBB">      </span><span style="color: #070">run</span>:
+<span style="color: #BBB">        </span><span style="color: #070">working-directory</span>:<span style="color: #BBB"> </span>src
+<span style="color: #BBB">    </span><span style="color: #070">steps</span>:
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">uses</span>:<span style="color: #BBB"> </span>actions/checkout@v4
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>Setup .NET
+<span style="color: #BBB">      </span><span style="color: #070">uses</span>:<span style="color: #BBB"> </span>actions/setup-dotnet@v4
+<span style="color: #BBB">      </span><span style="color: #070">with</span>:
+<span style="color: #BBB">        </span><span style="color: #070">dotnet-version</span>:<span style="color: #BBB"> </span>10.0.x
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>dotnet restore
+<span style="color: #BBB">      </span><span style="color: #070">run</span>:<span style="color: #BBB"> </span>dotnet restore
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>dotnet build<span style="color: #BBB"> </span>
+<span style="color: #BBB">      </span><span style="color: #070">run</span>:<span style="color: #BBB"> </span>dotnet build --no-restore
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>dotnet test
+<span style="color: #BBB">      </span><span style="color: #070">run</span>:<span style="color: #BBB"> </span>dotnet test --no-build --verbosity normal</pre>
+            </div>
+            <p>
+                Avec le message de commit :
+            </p>
+            <pre>feat(lib): Add CI workflow</pre>
             <h3>4) Configurer le dépot GitHub</h3>
             <p>
-                Dans l'onglet "Settings" du dépôt, il faut configurer les options suivantes:
+                Dans l'onglet "Settings" du dépôt sur GitHub, il faut configurer les options suivantes:
             </p>
             <ul>
                 <li>
-                    Dans "General":
+                    Dans <i>"General"</i>:
                     <ul>
                         <li>
-                            Activer/Désactiver les fonctionnalités en fonction de vos besoins. Dans mon cas, c'est généralement:
+                            Activer les <i>"Features"</i> :
                             <ul>
-                                <li>Issues</li>
-                                <li>Preserve this repository</li>
-                                <li>Discussions</li>
+                                <li><b>Issues</b></li>
+                                <li><b>Preserve this repository</b></li>
+                                <li><b>Discussions</b></li>
                             </ul>
                             <img src="picture2.png" alt="Fonctionnalités activées" />
                         </li>
                         <li>
-                            Pour "Pull Requests":
+                            Pour <i>"Pull Requests"</i>:
                             <ul>
-                                <li>Autorisez uniquement la fusion "Squash"</li>
-                                <li>Cochez "Always suggest updating pull request branches"</li>
-                                <li>Cocher "Automatically delete head branches"</li>
+                                <li>Activer <b>"Allow squash merging"</b> avec <i>Sélectionner "Default commit message"</i> à <b>"Pull request title"</b></li>
+                                <li>Activer <b>"Always suggest updating pull request branches"</b></li>
+                                <li>Activer <b>"Automatically delete head branches"</b></li>
                             </ul>
                             <img src="picture3.png" alt="Configuration générale des demandes de tirage" />
                         </li>
                     </ul>
                 </li>
                 <li>
-                    Dans "Rules > Rulesets":
+                    Dans <i>"Rules > Rulesets"</i>:
                     <ul>
                         <li>
-                            Cliquer sur "New branch ruleset"
+                            Cliquer sur <b>"New ruleset > New branch ruleset"</b>
                             <br />
                             <img src="picture4.png" alt="Créer une régle de gestion des branches" />
                         </li>
-                        <li>Saisir dans "Ruleset Name" "default-branches"</li>
-                        <li>Dans "Enforcement status", sélectionnez "Active"</li>
+                        <li>Saisir dans <i>"Ruleset Name"</i> <b>"default-branches"</b></li>
+                        <li>Sélectionner <i>"Enforcement status"</i> à <b>"Active"</b></li>
                         <li>
-                            Dans "Target branches", sélectionnez "Include default branch"
+                            Dans <i>"Target branches"</i>, sélectionnez <b>"Include default branch"</b>
                             <br />
                             <img src="picture5.png" alt="Configuration de la régle de gestion" />
                         </li>
                         <li>
                             Dans "Branch rules"
                             <ul>
-                                <li>Cocher "Restrict deletions"</li>
-                                <li>Cocher "Require linear history"</li>
-                                <li>Cocher "Require a pull request before merging" avec l'option "Require conversation resolution before merging"</li>
-                                <li>Cocher "Block force pushes"</li>
+                                <li>Activer <b>"Restrict deletions"</b></li>
+                                <li>Activer <b>"Require linear history"</b></li>
+                                <li>Activer <b>"Require a pull request before merging"</b> avec l'option <b>"Require conversation resolution before merging"</b></li>
+                                <li>Activer <b>"Block force pushes"</b></li>
                             </ul>
                             <img src="picture6.png" alt="Configuration de la régle de gestion (suite)" />
                         </li>
-                        <li>Cliquer sur "Create"</li>
+                        <li>Cliquer sur <b>"Create"</b></li>
                     </ul>
                 </li>
             </ul>
+            <h3>5) Publier la bibliothèque sur <i>nuget.org</i></h3>
+            <p>
+                Pour publier la bibliothèque sur <i>nuget.org</i>, j'utilise deux méthodes :
+            </p>
+            <h4>Publication manuelle avec le CLI dotnet</h4>
+            <p>
+                Pour certaines de mes bibliothèques, je publie une nouvelle version rarement. Je me retrouver à devoir à adapter le pipeline à chaque fois. Dans ce cas là, je préfére le faire manuellement.
+            </p>
+            <p>
+                Pour publier une nouvelle version de la bibliothèque manuellement, il faut exécuter les commandes suivantes :
+            </p>
+            <h4>Publication automaticée avec un pipeline GitHub Actions</h4>
             <blockquote class="end-quote">
                 <p>
-                    <strong>
+                    <b>
                         One possible testing approach is to swap your production database with SQLite, effectively using
                         it as a testing "fake".
-                    </strong>
+                    </b>
                 </p>
                 <hr>
                 <p>
-                    <strong>
+                    <b>
                         Une approche possible pour tester consiste à substituer le système de gestion de base de données
                         (SGBD) par SQLite, en l'utilisant comme une base de données factice.
-                    </strong>
+                    </b>
                 </p>
                 <footer>- <a href="https://learn.microsoft.com/en-us/ef/core/testing/choosing-a-testing-strategy#sqlite-as-a-database-fake">Entity
                         Framework Core documentation - SQLite as a database fake</a></footer>
