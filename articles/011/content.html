@@ -32,7 +32,7 @@
             </figure>
             <h3>1) Créer un dépot GitHub</h3>
             <p>
-                Lors de la création d'un dépôt GitHub, il faut saisir les informations suivantes:
+                Sur GitHub, il faut créer un nouveau dépôt avec les informations suivantes:
             </p>
             <ul>
                 <li>Remplir dans <i>"General"</i> :
@@ -146,8 +146,7 @@ dotnet sln add Vernou.Librairies.Example.Tests
             <span style="color: #007020">cd</span><span style="color: #BBB"> </span>Vernou.Librairies.Example
 
             <span style="color: #888"># Génére le package NuGet</span>
-            dotnet<span style="color: #BBB"> </span>pack
-            </pre></div>
+            dotnet<span style="color: #BBB"> </span>pack</pre></div>
             <p>
                 Finalement, il faut pousser les modifications sur GitHub :
             </p>
@@ -156,7 +155,7 @@ dotnet sln add Vernou.Librairies.Example.Tests
                 <pre style="margin: 0; line-height: 125%"><span style="color: #888888"># Pousse les modiffications sur GitHub</span>
 git add *
 git commit -m <span style="background-color: #fff0f0">&quot;feat(lib): Initialize the solution&quot;</span>
-git push</pre>
+git push</pre></div>
             <h3>3) Mise en place de l'intégration continue</h3>
             <p>
                 Dans le dépôt sur GitHub, il faut ajouter le fichier ".github/workflows/ci.yml" :
@@ -193,7 +192,7 @@ git push</pre>
             <p>
                 Avec le message de commit :
             </p>
-            <pre>feat(lib): Add CI workflow</pre>
+            <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%">feat(lib): Add CI workflow</pre></div>
             <h3>4) Configurer le dépot GitHub</h3>
             <p>
                 Dans l'onglet "Settings" du dépôt sur GitHub, il faut configurer les options suivantes:
@@ -214,7 +213,7 @@ git push</pre>
                         <li>
                             Pour <i>"Pull Requests"</i>:
                             <ul>
-                                <li>Activer <b>"Allow squash merging"</b> avec <i>Sélectionner "Default commit message"</i> à <b>"Pull request title"</b></li>
+                                <li>Activer <b>"Allow squash merging"</b> avec <i>"Default commit message"</i> à <b>"Pull request title"</b></li>
                                 <li>Activer <b>"Always suggest updating pull request branches"</b></li>
                                 <li>Activer <b>"Automatically delete head branches"</b></li>
                             </ul>
@@ -226,26 +225,49 @@ git push</pre>
                     Dans <i>"Rules > Rulesets"</i>:
                     <ul>
                         <li>
-                            Cliquer sur <b>"New ruleset > New branch ruleset"</b>
+                            Cliquer sur <b>"New ruleset > Import a ruleset"</b>
                             <br />
                             <img src="picture4.png" alt="Créer une régle de gestion des branches" />
                         </li>
-                        <li>Saisir dans <i>"Ruleset Name"</i> <b>"default-branches"</b></li>
-                        <li>Sélectionner <i>"Enforcement status"</i> à <b>"Active"</b></li>
                         <li>
-                            Dans <i>"Target branches"</i>, sélectionnez <b>"Include default branch"</b>
-                            <br />
-                            <img src="picture5.png" alt="Configuration de la régle de gestion" />
-                        </li>
-                        <li>
-                            Dans "Branch rules"
-                            <ul>
-                                <li>Activer <b>"Restrict deletions"</b></li>
-                                <li>Activer <b>"Require linear history"</b></li>
-                                <li>Activer <b>"Require a pull request before merging"</b> avec l'option <b>"Require conversation resolution before merging"</b></li>
-                                <li>Activer <b>"Block force pushes"</b></li>
-                            </ul>
-                            <img src="picture6.png" alt="Configuration de la régle de gestion (suite)" />
+                            Sélectionner le fichier JSON avec le contenu suivant :
+                            <!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span>{
+<span style="color: #BBB">  </span><span style="color: #070">&quot;name&quot;</span>:<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;default-branches&quot;</span>,
+<span style="color: #BBB">  </span><span style="color: #070">&quot;target&quot;</span>:<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;branch&quot;</span>,
+<span style="color: #BBB">  </span><span style="color: #070">&quot;enforcement&quot;</span>:<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;active&quot;</span>,
+<span style="color: #BBB">  </span><span style="color: #070">&quot;conditions&quot;</span>:<span style="color: #BBB"> </span>{
+<span style="color: #BBB">    </span><span style="color: #070">&quot;ref_name&quot;</span>:<span style="color: #BBB"> </span>{
+<span style="color: #BBB">      </span><span style="color: #070">&quot;exclude&quot;</span>:<span style="color: #BBB"> </span>[],
+<span style="color: #BBB">      </span><span style="color: #070">&quot;include&quot;</span>:<span style="color: #BBB"> </span>[<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;~DEFAULT_BRANCH&quot;</span><span style="color: #BBB"> </span>]
+<span style="color: #BBB">    </span>}
+<span style="color: #BBB">  </span>},
+<span style="color: #BBB">  </span><span style="color: #070">&quot;rules&quot;</span>:<span style="color: #BBB"> </span>[
+<span style="color: #BBB">    </span>{<span style="color: #BBB"> </span><span style="color: #070">&quot;type&quot;</span>:<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;deletion&quot;</span><span style="color: #BBB"> </span>},
+<span style="color: #BBB">    </span>{<span style="color: #BBB"> </span><span style="color: #070">&quot;type&quot;</span>:<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;non_fast_forward&quot;</span><span style="color: #BBB"> </span>},
+<span style="color: #BBB">    </span>{<span style="color: #BBB"> </span><span style="color: #070">&quot;type&quot;</span>:<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;required_linear_history&quot;</span><span style="color: #BBB"> </span>},
+<span style="color: #BBB">    </span>{
+<span style="color: #BBB">      </span><span style="color: #070">&quot;type&quot;</span>:<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;pull_request&quot;</span>,
+<span style="color: #BBB">      </span><span style="color: #070">&quot;parameters&quot;</span>:<span style="color: #BBB"> </span>{
+<span style="color: #BBB">        </span><span style="color: #070">&quot;required_approving_review_count&quot;</span>:<span style="color: #BBB"> </span><span style="color: #00D; font-weight: bold">0</span>,
+<span style="color: #BBB">        </span><span style="color: #070">&quot;dismiss_stale_reviews_on_push&quot;</span>:<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>,
+<span style="color: #BBB">        </span><span style="color: #070">&quot;required_reviewers&quot;</span>:<span style="color: #BBB"> </span>[],
+<span style="color: #BBB">        </span><span style="color: #070">&quot;require_code_owner_review&quot;</span>:<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>,
+<span style="color: #BBB">        </span><span style="color: #070">&quot;require_last_push_approval&quot;</span>:<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>,
+<span style="color: #BBB">        </span><span style="color: #070">&quot;required_review_thread_resolution&quot;</span>:<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">true</span>,
+<span style="color: #BBB">        </span><span style="color: #070">&quot;automatic_copilot_code_review_enabled&quot;</span>:<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>,
+<span style="color: #BBB">        </span><span style="color: #070">&quot;allowed_merge_methods&quot;</span>:<span style="color: #BBB"> </span>[<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;squash&quot;</span><span style="color: #BBB"> </span>]
+<span style="color: #BBB">      </span>}
+<span style="color: #BBB">    </span>}
+<span style="color: #BBB">  </span>],
+<span style="color: #BBB">  </span><span style="color: #070">&quot;bypass_actors&quot;</span>:<span style="color: #BBB"> </span>[
+<span style="color: #BBB">    </span>{
+<span style="color: #BBB">      </span><span style="color: #070">&quot;actor_id&quot;</span>:<span style="color: #BBB"> </span><span style="color: #00D; font-weight: bold">5</span>,
+<span style="color: #BBB">      </span><span style="color: #070">&quot;actor_type&quot;</span>:<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;RepositoryRole&quot;</span>,
+<span style="color: #BBB">      </span><span style="color: #070">&quot;bypass_mode&quot;</span>:<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;always&quot;</span>
+<span style="color: #BBB">    </span>}
+<span style="color: #BBB">  </span>]
+}
+</pre></div>
                         </li>
                         <li>Cliquer sur <b>"Create"</b></li>
                     </ul>
