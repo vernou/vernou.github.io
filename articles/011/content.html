@@ -273,19 +273,83 @@ git push</pre></div>
                     </ul>
                 </li>
             </ul>
-            <h3>5) Publier la bibliothèque sur <i>nuget.org</i></h3>
+            <h3>5) Mise en place de l'intégration continue</h3>
             <p>
-                Dans le dépôt sur GitHub, il faut ajouter le fichier <b>".github/workflows/publish.yml"</b> :
+                Sur <i>nuget.org</i>, créer <i>Trusted Publishing</i> avec :
+            </p>
+            <ul>
+                <li>Saisir dans "<i>Policy Name</i>"", <b>le nom de la bibliothèque</b></li>
+                <li>Sélectionner le "<i>Package Owner</i>"</li>
+                <li>Saisir dans "<i>Repository Owner</i>", <b>le nom de votre compte GitHub</b></li>
+                <li>Saisir dans "<i>Repository</i>", <b>le nom du dépot GitHub</b>, qui est le nom de la bibliothèque</li>
+                <li>Saisir dans "<i>Workflow File</i>", "<b>publish.yml</b>"</li>
+                <li>Cliquer sur "<i>Create</i>"</li>
+            </ul>
+            <img src="picture5.png" alt="Créer sur NuGet un Trusted Publishing" />
+            <p>
+                Ensuite dans le dépôt sur GitHub, il faut ajouter le fichier <b>".github/workflows/publish.yml"</b> :
+            </p>
+            <!-- HTML generated using hilite.me -->
+             <div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>Publish
+
+<span style="color: #070">on</span>:
+<span style="color: #BBB">  </span><span style="color: #070">push</span>:
+<span style="color: #BBB">    </span><span style="color: #070">tags</span>:
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;v[0-9]+.[0-9]+.[0-9]+&quot;</span>
+
+<span style="color: #070">jobs</span>:
+<span style="color: #BBB">  </span><span style="color: #070">publish</span>:
+<span style="color: #BBB">    </span><span style="color: #070">runs-on</span>:<span style="color: #BBB"> </span>ubuntu-latest
+<span style="color: #BBB">    </span><span style="color: #070">permissions</span>:
+<span style="color: #BBB">      </span><span style="color: #070">id-token</span>:<span style="color: #BBB"> </span>write
+<span style="color: #BBB">    </span><span style="color: #070">defaults</span>:
+<span style="color: #BBB">      </span><span style="color: #070">run</span>:
+<span style="color: #BBB">        </span><span style="color: #070">working-directory</span>:<span style="color: #BBB"> </span>src/Vernou.Librairies.Example
+<span style="color: #BBB">    </span><span style="color: #070">steps</span>:
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>Checkout
+<span style="color: #BBB">      </span><span style="color: #070">uses</span>:<span style="color: #BBB"> </span>actions/checkout@v2
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>Verify commit exists in origin/main
+<span style="color: #BBB">      </span><span style="color: #070">run</span>:<span style="color: #BBB"> </span>|
+<span style="color: #BBB">        </span><span style="color: #036; font-weight: bold">git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*</span>
+<span style="color: #BBB">        </span><span style="color: #036; font-weight: bold">git branch --remote --contains | grep origin/main</span>
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>Set VERSION variable from tag
+<span style="color: #BBB">      </span><span style="color: #070">run</span>:<span style="color: #BBB"> </span>echo &quot;VERSION=${GITHUB_REF/refs\/tags\/v/}&quot; &gt;&gt; $GITHUB_ENV
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>Pack
+<span style="color: #BBB">      </span><span style="color: #070">run</span>:<span style="color: #BBB"> </span>dotnet pack /p:Version=${VERSION} --output artifacts
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>NuGet login (OIDC)
+<span style="color: #BBB">      </span><span style="color: #070">uses</span>:<span style="color: #BBB"> </span>NuGet/login@v1
+<span style="color: #BBB">      </span><span style="color: #070">id</span>:<span style="color: #BBB"> </span>login
+<span style="color: #BBB">      </span><span style="color: #070">with</span>:
+<span style="color: #BBB">        </span><span style="color: #070">user</span>:<span style="color: #BBB"> </span>vernou
+<span style="color: #BBB">    </span>-<span style="color: #BBB"> </span><span style="color: #070">name</span>:<span style="color: #BBB"> </span>dotnet nuget push
+<span style="color: #BBB">      </span><span style="color: #070">run</span>:<span style="color: #BBB"> </span>|
+<span style="color: #BBB">        </span><span style="color: #036; font-weight: bold">dotnet nuget push artifacts/Vernou.Librairies.Example.${VERSION}.nupkg \</span>
+<span style="color: #BBB">          </span><span style="color: #036; font-weight: bold">--source https://api.nuget.org/v3/index.json \</span>
+<span style="color: #BBB">          </span><span style="color: #036; font-weight: bold">--api-key ${{ steps.login.outputs.NUGET_API_KEY }}</span>
+</pre></div>
+            <h3>6) Publier une version de la bibliothèque</h3>
+            <p>
+                TODO : Créer un tag et une release sur GitHub
             </p>
             <p>
-                TODO : YAML Code here
+                Pour publier une nouvelle version de la bibliothèque, il faut créer un tag et une release depuis GitHub :
             </p>
-            <p>
-                TODO : Configurer NUGET_SECRET
-            </p>
-            <p>
-                TODO : Configurer NuGet.org trusting GitHub
-            </p>
+            <ol>
+                <li>Aller sur l'onget "<i>Code</i>"</li>
+                <li>Cliquer sur "<i>Releases</i>"</li>
+                <li>Cliquer sur "<i>Draft a new release</i>"</li>
+                <li>Déplier "<i>Tag: Select tag</i>"</li>
+                <li>Cliquer sur le boutton "<i>Create new tag</i>"</li>
+                <li>Saisir la version au format "vX.Y.Z" (ex: v1.0.0)</li>
+                <li>Cliquer sur "<i>Create</i>"</li>
+            </ol>
+            <figure>
+                <video controls preload="metadata" style="max-width:100%;height:auto;">
+                    <source src="video1.mp4" type="video/mp4">
+                    Votre navigateur ne supporte pas la balise vidéo.
+                </video>
+                <figcaption>Vidéo montrant comment créer une release avec un tag sur GitHub</figcaption>
+            </figure>
             <blockquote class="end-quote">
                 <p>
                     <b>
